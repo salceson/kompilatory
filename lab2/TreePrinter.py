@@ -37,7 +37,7 @@ class TreePrinter:
     @addToClass(AST.Arg)
     def printTree(self, indent=0):
         res = indent * indent_char
-        res += "Arg " + self.id + '\n'
+        res += "Arg " + self.idd + '\n'
         return res
 
     @addToClass(AST.ArgList)
@@ -117,7 +117,7 @@ class TreePrinter:
     @addToClass(AST.Init)
     def printTree(self, indent=0):
         res = indent * indent_char + "=\n"
-        res += self.var_name.printTree(indent + 1)
+        res += (indent + 1) * indent_char + self.var_name
         res += self.expression.printTree(indent + 1)
         return res
 
@@ -220,8 +220,8 @@ class TreePrinter:
     @addToClass(AST.Fundef)
     def printTree(self, indent=0):
         res = indent * indent_char + "FUNDEF\n"
-        res += self._id.printTree(indent + 1)
-        res += (indent + 1) * indent_char + "RET " + self.t.printTree(0)
+        res += (indent + 1) * indent_char + self._id
+        res += (indent + 1) * indent_char + "RET " + self.t
         res += self.args_list.printTree(indent + 1)
         res += self.comp_instr.printTree(indent + 1)
         return res
@@ -229,6 +229,8 @@ class TreePrinter:
     @addToClass(AST.FundefList)
     def printTree(self, indent=0):
         res = ""
+        print type(self)
+        print self.fundef_list
         for f in self.fundef_list:
             res += f.printTree(indent)
         return res

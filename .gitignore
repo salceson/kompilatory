@@ -56,3 +56,7 @@ target/
 #PyCharm
 .idea/
 *.iml
+
+#PLY files
+parser.out
+parsetab.py

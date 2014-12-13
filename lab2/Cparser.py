@@ -38,7 +38,6 @@ class Cparser(object):
         #     ^            ^         ^          ^
         #    p[0]         p[1]      p[2]       p[3]
         program = AST.Program(p[1], p[2], p[3])
-        print(program)
         p[0] = program
 
     def p_declarations(self, p):
@@ -62,8 +61,8 @@ class Cparser(object):
         """inits : inits ',' init
                  | init """
         if len(p) == 4:  # occurs when inits -> inits, init
-            p[0].inits.append(p[3])
             p[0] = p[1]
+            p[0].inits.append(p[3])
         else:  # occurs when inits -> init
             p[0] = AST.Inits()
             p[0].inits.append(p[1])
@@ -211,9 +210,9 @@ class Cparser(object):
                      | expression """
         p[0] = AST.ExprList()
         if len(p) == 4:
-            p[0].append_expr(p[2])
+            p[0].cons_expr(p[1].expr_list, p[3])
         else:
-            p[0].cons_expr(p[1], p[3])
+            p[0].append_expr(p[1])
 
     def p_fundefs(self, p):
         """fundefs : fundef fundefs
@@ -221,7 +220,7 @@ class Cparser(object):
         # nie, bo moze w ogole nie byc definicji funkcji - to Ci pozwala na zamiane fundefs -> epsilon
         p[0] = AST.FundefList()
         if len(p) == 3:
-            p[0].cons_fun(p[2], p[1])
+            p[0].cons_fun(p[2].fundef_list, p[1])
         elif len(p) == 2:
             p[0].append_fun(p[1])
 
@@ -242,7 +241,7 @@ class Cparser(object):
                      | arg """
         p[0] = AST.ArgList()
         if len(p) == 4:
-            p[0].cons_arg(p[1], p[3])
+            p[0].cons_arg(p[1].arg_list, p[3])
         else:
             p[0].append_arg(p[1])
 

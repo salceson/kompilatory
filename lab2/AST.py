@@ -22,7 +22,8 @@ class ArgList(Node):
         self.arg_list.append(a)
 
     def cons_arg(self, arg_list, a):
-        self.arg_list = list(arg_list).append(a)
+        self.arg_list = list(arg_list)
+        self.arg_list.append(a)
 
 
 class Fundef(Node):
@@ -41,7 +42,8 @@ class FundefList(Node):
         self.fundef_list.append(f)
 
     def cons_fun(self, fundef_list, f):
-        self.fundef_list = list(fundef_list).insert(0, f)
+        self.fundef_list = list(fundef_list)
+        self.fundef_list.insert(0, f)
 
 
 # mozna sie klocic, czy to jest potrzebne, ale przyjalem zasade
@@ -60,7 +62,8 @@ class ExprList(Node):
         self.expr_list.append(e)
 
     def cons_expr(self, expr_list, e):      # ta metoda to nie wiem, ale niech juz bedzie
-        self.expr_list = list(expr_list).append(e)
+        self.expr_list = list(expr_list)
+        self.expr_list.append(e)
 
 
 # class ConstExpr(Node):

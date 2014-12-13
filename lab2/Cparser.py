@@ -200,7 +200,8 @@ class Cparser(object):
     def p_expr_list_or_empty(self, p):
         """expr_list_or_empty : expr_list
                               | """
-        if isinstance(p[1], AST.Empty) or p[1] == "":     # ok, prawda jest taka, ze jeszcze nie wiem, ktore z tych dwoch tam bedzie ;)
+        if isinstance(p[1], AST.Empty) or p[1] == "":
+             # ok, prawda jest taka, ze jeszcze nie wiem, ktore z tych dwoch tam bedzie ;)
             p[0] = p[1]
         else:
             p[0] = AST.ExprList()
@@ -216,8 +217,7 @@ class Cparser(object):
 
     def p_fundefs(self, p):
         """fundefs : fundef fundefs
-                   |  """     # czy tu nie ma byc | fundef zamiast pustego?
-        # nie, bo moze w ogole nie byc definicji funkcji - to Ci pozwala na zamiane fundefs -> epsilon
+                   |  """
         p[0] = AST.FundefList()
         if len(p) == 3:
             p[0].cons_fun(p[2].fundef_list, p[1])

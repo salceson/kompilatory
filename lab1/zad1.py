@@ -27,7 +27,7 @@ dates_pattern = re.compile(
     r'(?P<separatorB2>[-\./])(?P<monthB2>0[469]|11)|(?P<dayB3>[0-1]\d|2[0-9])'
     r'(?P<separatorB3>[-\./])(?P<monthB3>02))((?P=separatorB1)|(?P=separatorB2)|(?P=separatorB3))'
     r'(?P<yearB>\d{4})',
-    re_flags)
+    re_flags)  # TODO: Fix accepting 00 as day
 emails_pattern = re.compile(
     r'([A-Za-z0-9+\-]([A-Za-z0-9+\-]|[A-Za-z0-9+\-\.][A-Za-z0-9+\-])+'
     r'@[A-Za-z0-9]([A-Za-z\.0-9][A-Za-z0-9]|[A-Za-z0-9])*\.[A-Za-z0-9]{2,4})',

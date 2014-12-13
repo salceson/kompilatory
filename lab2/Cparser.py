@@ -151,6 +151,7 @@ class Cparser(object):
         """const : INTEGER
                  | FLOAT
                  | STRING"""
+        p[0] = p[1]
 
     def p_expression(self, p):
         """expression : const
@@ -177,29 +178,65 @@ class Cparser(object):
                       | '(' error ')'
                       | ID '(' expr_list_or_empty ')'
                       | ID '(' error ')' """
+        length = len(p)
+        # if length == 1 -> throw new WhatTheFException
+        if length == 2:   # const lub ID
+            p[0] = AST.Constt(p[1])        # jeszcze nie wiem, jak rozroznic ID...
+        elif length == 4:
+            if p[1] == '(':
+                p[0] = AST.ParenExpr(p[1])
+            else:
+                p[0] = AST.BinExpr(p[2], p[1], p[3])  # operator pierwszy
+        elif length == 5:
+            p[0] = AST.IDExpr(p[1], True, p[3], True)
 
     def p_expr_list_or_empty(self, p):
         """expr_list_or_empty : expr_list
                               | """
+        if len(p) == 2:
+            p[0] = p[1]
+        else:
+            p[0] = AST.ExprList()
 
     def p_expr_list(self, p):
         """expr_list : expr_list ',' expression
                      | expression """
+        p[0] = AST.ExprList()
+        if len(p) == 4:
+            p[0].append_expr(p[2])
+        else:
+            p[0].cons_expr(p[1], p[3])
 
     def p_fundefs(self, p):
         """fundefs : fundef fundefs
-                   |  """
+                   |  """     # czy tu nie ma byc | fundef zamiast pustego?
+        p[0] = AST.FundefList()
+        if len(p) == 3:
+            p[0].cons_fun(p[2], p[1])
+        elif len(p) == 2:
+            p[0].append_fun(p[1])
 
     def p_fundef(self, p):
         """fundef : TYPE ID '(' args_list_or_empty ')' compound_instr """
+        p[0] = AST.Fundef(p[1], p[2], p[4], p[6])
 
     def p_args_list_or_empty(self, p):
         """args_list_or_empty : args_list
                               | """
+        if len(p) == 2:
+            p[0] = p[1]
+        else:
+            p[0] = AST.ArgList()  # empty
 
     def p_args_list(self, p):
         """args_list : args_list ',' arg 
                      | arg """
+        p[0] = AST.ArgList()
+        if len(p) == 4:
+            p[0].cons_arg(p[1], p[3])
+        else:
+            p[0].append_arg(p[1])
 
     def p_arg(self, p):
         """arg : TYPE ID """
+        p[0] = AST.Arg(p[1], p[2])

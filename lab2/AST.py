@@ -3,6 +3,85 @@ class Node(object):
         return self.printTree()
 
 
+class Arg(Node):
+    def __init__(self, t, idd):
+        self.t = t
+        self.idd = idd
+
+
+class ArgList(Node):
+    def __init__(self):
+        self.arg_list = []
+
+    def append_arg(self, a):
+        self.arg_list.append(a)
+
+    def cons_arg(self, arg_list, a):
+        self.arg_list = list(arg_list).append(a)
+
+
+class Fundef(Node):
+    def __init__(self, t, idd, args_list, comp_instr):
+        self.t = t
+        self.idd = idd
+        self.args_list = args_list
+        self.comp_instr = comp_instr
+
+
+class FundefList(Node):
+    def __init__(self):
+        self.fundef_list = []
+
+    def append_fun(self, f):
+        self.fundef_list.append(f)
+
+    def cons_fun(self, fundef_list, f):
+        self.fundef_list = list(fundef_list).insert(0, f)
+
+
+# mozna sie klocic, czy to jest potrzebne, ale przyjalem zasade
+# jest produkcja --> jest klasa. Nie trzeba sie zastanawiac i robic logiki
+# dzieki temu
+class Empty(Node):
+    def __init__(self):
+        pass
+
+
+class ExprList(Node):
+    def __init__(self):
+        self.expr_list = []
+
+    def append_expr(self, e):
+        self.expr_list.append(e)
+
+    def cons_expr(self, expr_list, e):      # ta metoda to nie wiem, ale niech juz bedzie
+        self.expr_list = list(expr_list).append(e)
+
+
+class Constt(Node):     # sorry za to drugie t, ale const to chyba keyword w pajtonie ;)
+    def __init__(self, const_val):
+        self.const_val = const_val
+
+
+class ConstExpr(Node):
+    def __init__(self, constt):
+        self.constt = constt
+
+
+class IDExpr(Node):
+    def __init__(self, id, leftParen, expr_list_or_err_or_empty, rightParen):
+        self.id = id
+        self.leftParen = leftParen
+        self.expr_list_or_err_or_empty = expr_list_or_err_or_empty
+        self.rightParen = rightParen
+        ## if leftParen != rightParen --> throw TerribleSyntaxException
+
+
+class ParenExpr(Node):
+    def __init__(self, expr_or_err):
+        self.expression = expr_or_err
+
+
 class BinExpr(Node):
     def __init__(self, op, left, right):
         self.op = op

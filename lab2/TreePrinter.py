@@ -149,11 +149,17 @@ class TreePrinter:
             res += e.printTree(indent) + "\n"
         return res
 
+    @addToClass(AST.Funcall)
+    def printTree(self, indent=0):
+        res = indent * indent_char + "FUNCALL\n"
+        res += (indent + 1) * indent_char + self._id + "\n"
+        res += self.expr_list.printTree(indent+1) + "\n"
+        return res
+
     @addToClass(AST.IDExpr)
     def printTree(self, indent=0):
         res = indent * indent_char
         res += self._id + '\n'
-        res += self.expr_list_or_err_or_empty.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.IfInstr)
@@ -196,7 +202,7 @@ class TreePrinter:
     @addToClass(AST.PrintInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "PRINT\n"
-        res += self.to_print(indent + 1) if isinstance(self.to_print, AST.Expression)\
+        res += self.to_print.printTree(indent + 1) if isinstance(self.to_print, AST.Expression)\
             else (indent + 1) * indent_char + self.to_print
         return res + "\n"
 

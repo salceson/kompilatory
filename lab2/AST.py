@@ -74,13 +74,15 @@ class Expression(Node):
     pass
 
 
-class IDExpr(Expression):
-    def __init__(self, _id, leftParen, expr_list_or_err_or_empty, rightParen):
+class Funcall(Expression):
+    def __init__(self, _id, expr_list):
         self._id = _id
-        self.leftParen = leftParen
-        self.expr_list_or_err_or_empty = expr_list_or_err_or_empty
-        self.rightParen = rightParen
-        ## if leftParen != rightParen --> throw TerribleSyntaxException
+        self.expr_list = expr_list
+
+
+class IDExpr(Expression):
+    def __init__(self, _id):
+        self._id = _id
 
 
 class ParenExpr(Expression):

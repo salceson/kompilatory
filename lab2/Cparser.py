@@ -160,10 +160,26 @@ class Cparser(object):
             except ValueError:
                 p[0] = AST.String[p[1]]
 
-    def p_expression(self, p):
-        """expression : const
-                      | ID
-                      | expression '+' expression
+    def p_id_expr(self, p):
+        """expression : ID"""
+        p[0] = AST.IDExpr(p[1])
+
+    def p_const_expr(self, p):
+        """expression : const"""
+        p[0] = p[1]
+
+    def p_paren_expression(self, p):
+        """expression : '(' expression ')'
+                      | '(' error ')'"""
+        p[0] = AST.ParenExpr(p[2])
+
+    def p_funcall(self, p):
+        """expression : ID '(' expr_list_or_empty ')'
+                      | ID '(' error ')' """
+        p[0] = AST.Funcall(p[1], p[3])
+
+    def p_bin_expression(self, p):
+        """expression : expression '+' expression
                       | expression '-' expression
                       | expression '*' expression
                       | expression '/' expression
@@ -180,31 +196,13 @@ class Cparser(object):
                       | expression '>' expression
                       | expression '<' expression
                       | expression LE expression
-                      | expression GE expression
-                      | '(' expression ')'
-                      | '(' error ')'
-                      | ID '(' expr_list_or_empty ')'
-                      | ID '(' error ')' """
-        length = len(p)
-        # if length == 1 -> throw new WhatTheFException
-        if length == 2:   # const lub ID
-            p[0] = p[1]     # teraz, jak mamy nowa klase na ID, to nic nie opakowujemy, ten typ tam jest i nie zniknie
-        elif length == 4:
-            if p[1] == '(':
-                p[0] = AST.ParenExpr(p[1])
-            else:
-                p[0] = AST.BinExpr(p[2], p[1], p[3])  # operator pierwszy
-        elif length == 5:
-            p[0] = AST.IDExpr(p[1], True, p[3], True)
+                      | expression GE expression"""
+        p[0] = AST.BinExpr(p[2], p[1], p[3])  # operator pierwszy
 
     def p_expr_list_or_empty(self, p):
         """expr_list_or_empty : expr_list
                               | """
-        if isinstance(p[1], AST.Empty) or p[1] == "":
-             # ok, prawda jest taka, ze jeszcze nie wiem, ktore z tych dwoch tam bedzie ;)
-            p[0] = p[1]
-        else:
-            p[0] = AST.ExprList()
+        p[0] = p[1]
 
     def p_expr_list(self, p):
         """expr_list : expr_list ',' expression

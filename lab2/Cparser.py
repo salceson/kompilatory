@@ -202,7 +202,7 @@ class Cparser(object):
     def p_expr_list_or_empty(self, p):
         """expr_list_or_empty : expr_list
                               | """
-        p[0] = p[1]
+        p[0] = None if len(p) == 1 else p[1]
 
     def p_expr_list(self, p):
         """expr_list : expr_list ',' expression

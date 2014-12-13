@@ -143,7 +143,8 @@ class TreePrinter:
     def printTree(self, indent=0):
         res = indent * indent_char + "FUNCALL\n"
         res += (indent + 1) * indent_char + self._id + "\n"
-        res += self.expr_list.printTree(indent+1)
+        if self.expr_list is not None:
+            res += self.expr_list.printTree(indent+1)
         return res
 
     @addToClass(AST.Variable)

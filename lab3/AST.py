@@ -71,7 +71,7 @@ class Funcall(Expression):
         self.expr_list = expr_list
 
 
-class IDExpr(Expression):
+class Variable(Expression):
     def __init__(self, _id):
         self._id = _id
 

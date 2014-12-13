@@ -162,7 +162,7 @@ class Cparser(object):
 
     def p_id_expr(self, p):
         """expression : ID"""
-        p[0] = AST.IDExpr(p[1])
+        p[0] = AST.Variable(p[1])
 
     def p_const_expr(self, p):
         """expression : const"""

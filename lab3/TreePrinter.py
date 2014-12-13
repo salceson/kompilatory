@@ -146,7 +146,7 @@ class TreePrinter:
         res += self.expr_list.printTree(indent+1)
         return res
 
-    @addToClass(AST.IDExpr)
+    @addToClass(AST.Variable)
     def printTree(self, indent=0):
         res = indent * indent_char
         res += self._id + '\n'

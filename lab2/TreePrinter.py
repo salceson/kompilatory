@@ -32,9 +32,9 @@ class TreePrinter:
     @addToClass(AST.Program)
     def printTree(self, indent=0):
         res = ""
-        res += self.declarations.printTree(indent + 1) + "\n"
-        res += self.fundefs.printTree(indent + 1) + "\n"
-        res += self.instructions.printTree(indent + 1) + "\n"
+        res += self.declarations.printTree(indent) + "\n"
+        res += self.fundefs.printTree(indent) + "\n"
+        res += self.instructions.printTree(indent) + "\n"
         return res
 
     @addToClass(AST.Arg)

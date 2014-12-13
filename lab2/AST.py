@@ -70,8 +70,11 @@ class ExprList(Node):
 #     def __init__(self, constt):
 #         self.constt = constt
 
+class Expression(Node):
+    pass
 
-class IDExpr(Node):
+
+class IDExpr(Expression):
     def __init__(self, _id, leftParen, expr_list_or_err_or_empty, rightParen):
         self._id = _id
         self.leftParen = leftParen
@@ -80,12 +83,12 @@ class IDExpr(Node):
         ## if leftParen != rightParen --> throw TerribleSyntaxException
 
 
-class ParenExpr(Node):
+class ParenExpr(Expression):
     def __init__(self, expr_or_err):
         self.expression = expr_or_err
 
 
-class BinExpr(Node):
+class BinExpr(Expression):
     def __init__(self, op, left, right):
         self.op = op
         self.left = left
@@ -187,10 +190,6 @@ class Assignment(Node):
     def __init__(self, var, expr):
         self.var = var
         self.expr = expr
-
-
-class Expression(Node):
-    pass
 
 
 class Const(Node):

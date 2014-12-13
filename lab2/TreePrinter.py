@@ -22,16 +22,19 @@ class TreePrinter:
     def printTree(self, indent=0):
         res = indent_char * indent
         res += self.op + '\n'
-        res += self.left.printTree(indent + 1)
-        res += self.right.printTree(indent + 1)
-        return res
+        res += self.left.printTree(indent + 1) if isinstance(self.left, (AST.Const, AST.Expression))\
+            else indent_char * (indent + 1) + self.left
+        res += "\n"
+        res += self.right.printTree(indent + 1) if isinstance(self.right, (AST.Const, AST.Expression))\
+            else indent_char * (indent + 1) + self.right
+        return res + "\n"
 
     @addToClass(AST.Program)
     def printTree(self, indent=0):
         res = ""
-        res += self.declarations.printTree(indent + 1)
-        res += self.fundefs.printTree(indent + 1)
-        res += self.instructions.printTree(indent + 1)
+        res += self.declarations.printTree(indent + 1) + "\n"
+        res += self.fundefs.printTree(indent + 1) + "\n"
+        res += self.instructions.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.Arg)
@@ -44,15 +47,16 @@ class TreePrinter:
     def printTree(self, indent=0):
         res = ""
         for argg in self.arg_list:
-            res += argg.printTree(indent + 1)
+            res += argg.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.Assignment)
     def printTree(self, indent=0):
         res = indent * indent_char + "=\n"
-        res += self.var.printTree(indent + 1)
-        res += self.expr.printTree(indent + 1)
-        return res
+        res += indent_char * (indent + 1) + self.var + "\n"
+        res += self.expr.printTree(indent + 1) if isinstance(self.expr, AST.Expression)\
+            else indent_char * (indent + 1) + self.expr
+        return res + "\n"
 
     @addToClass(AST.BreakInstr)
     def printTree(self, indent=0):
@@ -92,8 +96,8 @@ class TreePrinter:
     @addToClass(AST.CompoundInstr)
     def printTree(self, indent=0):
         res = ""
-        res += self.decls.printTree(indent)
-        res += self.instrs.printTree(indent)
+        res += self.decls.printTree(indent) + "\n"
+        res += self.instrs.printTree(indent) + "\n"
         return res
 
     @addToClass(AST.ContinueInstr)
@@ -104,28 +108,28 @@ class TreePrinter:
     @addToClass(AST.Declaration)
     def printTree(self, indent=0):
         res = indent * indent_char + "DECL\n"
-        res += self.inits.printTree(indent + 1)
+        res += self.inits.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.Declarations)
     def printTree(self, indent=0):
         res = ""
         for d in self.declarations:
-            res += d.printTree(indent)
+            res += d.printTree(indent) + "\n"
         return res
 
     @addToClass(AST.Init)
     def printTree(self, indent=0):
         res = indent * indent_char + "=\n"
-        res += (indent + 1) * indent_char + self.var_name
-        res += self.expression.printTree(indent + 1)
+        res += (indent + 1) * indent_char + self.var_name + "\n"
+        res += self.expression.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.Inits)
     def printTree(self, indent=0):
         res = ""
         for i in self.inits:
-            res += i.printTree(indent)
+            res += i.printTree(indent) + "\n"
         return res
 
     @addToClass(AST.Empty)
@@ -142,95 +146,98 @@ class TreePrinter:
     def printTree(self, indent=0):
         res = ""
         for e in self.expr_list:
-            res += e.printTree(indent)
+            res += e.printTree(indent) + "\n"
         return res
 
     @addToClass(AST.IDExpr)
     def printTree(self, indent=0):
         res = indent * indent_char
         res += self._id + '\n'
-        res += self.expr_list_or_err_or_empty.printTree(indent + 1)
+        res += self.expr_list_or_err_or_empty.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.IfInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "IF\n"
-        res += self.cond.printTree(indent + 1)
-        res += self.instr.printTree(indent + 1)
+        res += self.cond.printTree(indent + 1) + "\n"
+        res += self.instr.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.IfElseInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "IF\n"
-        res += self.cond.printTree(indent + 1)
-        res += self.instr.printTree(indent + 1)
+        res += self.cond.printTree(indent + 1) + "\n"
+        res += self.instr.printTree(indent + 1) + "\n"
         res += indent * indent_char + "ELSE\n"
-        res += self.elseintr.printTree(indent + 1)
+        res += self.elseinstr.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.WhileInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "WHILE\n"
-        res += self.cond.printTree(indent + 1)
-        res += self.instr.printTree(indent + 1)
+        res += self.cond.printTree(indent + 1) + "\n"
+        res += self.instr.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.RepeatInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "REPEAT\n"
-        res += self.cond.printTree(indent + 1)
-        res += self.instrs.printTree(indent + 1)
+        res += self.cond.printTree(indent + 1) + "\n"
+        res += self.instrs.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.ReturnInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "RETURN\n"
-        res += self.expr.printTree(indent + 1)
-        return res
+        res += self.expr.printTree(indent + 1) if isinstance(self.expr, AST.Expression)\
+            else (indent + 1) * indent_char + self.expr
+        return res + "\n"
 
     @addToClass(AST.PrintInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "PRINT\n"
-        res += self.to_print.printTree(indent + 1)
-        return res
+        res += self.to_print(indent + 1) if isinstance(self.to_print, AST.Expression)\
+            else (indent + 1) * indent_char + self.to_print
+        return res + "\n"
 
     @addToClass(AST.LabeledInstruction)
     def printTree(self, indent=0):
-        res = self.label.printTree(indent)
-        res += self.instr.printTree(indent + 1)
+        res = self.label.printTree(indent) + "\n"
+        res += self.instr.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.Instructions)
     def printTree(self, indent=0):
         res = ""
         for i in self.instructions:
-            res += i.printTree(indent)
+            res += i.printTree(indent) + "\n"
         return res
 
     @addToClass(AST.ParenExpr)
     def printTree(self, indent=0):
         # nie wypisujemy nawiasow w ASt, wiec w sumie to samo, co zwykle expression
-        return self.expr_or_err.printTree(indent)
+        to_ret = self.expression.printTree(indent)\
+            if isinstance(self.expression, (AST.Expression, AST.Const))\
+            else indent * indent_char + self.expression
+        return to_ret + "\n"
 
     @addToClass(AST.Variable)
     def printTree(self, indent=0):
         # jak wyzej, typ nam niepotrzebny w AST, wypisujemy jak zwykle expression
-        return self.val.printTree(indent)
+        return self.val.printTree(indent) + "\n"
 
     @addToClass(AST.Fundef)
     def printTree(self, indent=0):
         res = indent * indent_char + "FUNDEF\n"
-        res += (indent + 1) * indent_char + self._id
-        res += (indent + 1) * indent_char + "RET " + self.t
-        res += self.args_list.printTree(indent + 1)
-        res += self.comp_instr.printTree(indent + 1)
+        res += (indent + 1) * indent_char + self._id + "\n"
+        res += (indent + 1) * indent_char + "RET " + self.t + "\n"
+        res += self.args_list.printTree(indent + 1) + "\n"
+        res += self.comp_instr.printTree(indent + 1) + "\n"
         return res
 
     @addToClass(AST.FundefList)
     def printTree(self, indent=0):
         res = ""
-        print type(self)
-        print self.fundef_list
         for f in self.fundef_list:
-            res += f.printTree(indent)
+            res += f.printTree(indent) + "\n"
         return res

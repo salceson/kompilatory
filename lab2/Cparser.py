@@ -210,6 +210,7 @@ class Cparser(object):
     def p_fundefs(self, p):
         """fundefs : fundef fundefs
                    |  """     # czy tu nie ma byc | fundef zamiast pustego?
+        # nie, bo moze w ogole nie byc definicji funkcji - to Ci pozwala na zamiane fundefs -> epsilon
         p[0] = AST.FundefList()
         if len(p) == 3:
             p[0].cons_fun(p[2], p[1])

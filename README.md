@@ -6,4 +6,5 @@ Laboratoria z kompilatorów.
 Zawartości folderów:
 
 * lab1 - wyrażenia regularne
-* lab2 - język c-like - drzewo rozbioru
+* lab2 - język c-like - parsing oraz drzewo rozbioru
+* lab3 - język c-like - kontrola semantyczna

@@ -23,9 +23,9 @@ class TreePrinter:
     def printTree(self, indent=0):
         res = indent_char * indent
         res += self.op + '\n'
-        res += self.left.printTree(indent + 1) if isinstance(self.left, (AST.Const, AST.Expression))\
+        res += self.left.printTree(indent + 1) if isinstance(self.left, AST.Expression)\
             else indent_char * (indent + 1) + self.left
-        res += self.right.printTree(indent + 1) if isinstance(self.right, (AST.Const, AST.Expression))\
+        res += self.right.printTree(indent + 1) if isinstance(self.right, AST.Expression)\
             else indent_char * (indent + 1) + self.right
         return res
 
@@ -62,13 +62,6 @@ class TreePrinter:
     def printTree(self, indent=0):
         return indent * indent_char + " BREAK\n"
 
-
-    @addToClass(AST.Const)
-    def printTree(self, indent=0):
-        res = indent * indent_char
-        res += self.val + "\n"
-        return res
-
     @addToClass(AST.Integer)
     def printTree(self, indent=0):
         res = indent * indent_char
@@ -92,12 +85,6 @@ class TreePrinter:
         if print_types:
             res += " (string)"
         return res + "\n"
-
-    @addToClass(AST.ID)
-    def printTree(self, indent=0):
-        res = indent * indent_char
-        res += self.val + "\n"
-        return res
 
     @addToClass(AST.CompoundInstr)
     def printTree(self, indent=0):
@@ -143,7 +130,7 @@ class TreePrinter:
 
     @addToClass(AST.Error)
     def printTree(self, indent=0):
-        return "ERROR"    # TODO errory trzeba oblsugiwac i wtedy wypisywac
+        return "ERROR\n"    # TODO errory trzeba oblsugiwac i wtedy wypisywac
 
     @addToClass(AST.ExprList)
     def printTree(self, indent=0):
@@ -228,11 +215,6 @@ class TreePrinter:
         to_ret = self.expression.printTree(indent) if isinstance(self.expression, (AST.Expression, AST.Const))\
             else indent * indent_char + self.expression
         return to_ret
-
-    @addToClass(AST.Variable)
-    def printTree(self, indent=0):
-        # jak wyzej, typ nam niepotrzebny w AST, wypisujemy jak zwykle expression
-        return self.val.printTree(indent) + "\n"
 
     @addToClass(AST.Fundef)
     def printTree(self, indent=0):

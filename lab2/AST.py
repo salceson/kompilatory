@@ -3,11 +3,6 @@ class Node(object):
         return self.printTree()
 
 
-class ID(Node):
-    def __init__(self, _id):
-        self._id = _id
-
-
 class Arg(Node):
     def __init__(self, t, idd):
         self.t = t
@@ -66,10 +61,6 @@ class ExprList(Node):
         self.expr_list.append(e)
 
 
-# class ConstExpr(Node):
-#     def __init__(self, constt):
-#         self.constt = constt
-
 class Expression(Node):
     pass
 
@@ -126,6 +117,7 @@ class Init(Node):
         self.expression = expression
 
 
+# Instructions
 class Instructions(Node):
     def __init__(self):
         self.instructions = []
@@ -194,9 +186,9 @@ class Assignment(Node):
         self.expr = expr
 
 
+# Constants
 class Const(Node):
-    def __init__(self, val):
-        self.val = val
+    pass
 
 
 class Integer(Const):
@@ -212,11 +204,6 @@ class Float(Const):
 class String(Const):
     def __init__(self, val):
         Const.__init__(self, val)
-
-
-class Variable(Node):
-    def __init__(self, val):
-        self.val = val
 
 
 class Error(Node):

@@ -3,6 +3,11 @@ class Node(object):
         return self.printTree()
 
 
+class ID(Node):
+    def __init__(self, _id):
+        self._id = _id
+
+
 class Arg(Node):
     def __init__(self, t, idd):
         self.t = t
@@ -21,9 +26,9 @@ class ArgList(Node):
 
 
 class Fundef(Node):
-    def __init__(self, t, idd, args_list, comp_instr):
+    def __init__(self, t, _id, args_list, comp_instr):
         self.t = t
-        self.idd = idd
+        self._id = _id
         self.args_list = args_list
         self.comp_instr = comp_instr
 
@@ -58,19 +63,14 @@ class ExprList(Node):
         self.expr_list = list(expr_list).append(e)
 
 
-class Constt(Node):     # sorry za to drugie t, ale const to chyba keyword w pajtonie ;)
-    def __init__(self, const_val):
-        self.const_val = const_val
-
-
-class ConstExpr(Node):
-    def __init__(self, constt):
-        self.constt = constt
+# class ConstExpr(Node):
+#     def __init__(self, constt):
+#         self.constt = constt
 
 
 class IDExpr(Node):
-    def __init__(self, id, leftParen, expr_list_or_err_or_empty, rightParen):
-        self.id = id
+    def __init__(self, _id, leftParen, expr_list_or_err_or_empty, rightParen):
+        self._id = _id
         self.leftParen = leftParen
         self.expr_list_or_err_or_empty = expr_list_or_err_or_empty
         self.rightParen = rightParen
@@ -191,23 +191,28 @@ class Expression(Node):
 
 
 class Const(Node):
-    pass
+    def __init__(self, val):
+        self.val = val
 
 
 class Integer(Const):
-    pass
+    def __init__(self, val):
+        Const.__init__(self, val)
 
 
 class Float(Const):
-    pass
+    def __init__(self, val):
+        Const.__init__(self, val)
 
 
 class String(Const):
-    pass
+    def __init__(self, val):
+        Const.__init__(self, val)
 
 
 class Variable(Node):
-    pass
+    def __init__(self, val):
+        self.val = val
 
 
 class Error(Node):

@@ -151,7 +151,15 @@ class Cparser(object):
         """const : INTEGER
                  | FLOAT
                  | STRING"""
-        p[0] = p[1]
+        try:
+            int(p[1])
+            p[0] = AST.Integer(p[1])
+        except ValueError:
+            try:
+                float(p[1])
+                p[0] = AST.Float(p[1])
+            except ValueError:
+                p[0] = AST.String[p[1]]
 
     def p_expression(self, p):
         """expression : const
@@ -181,7 +189,7 @@ class Cparser(object):
         length = len(p)
         # if length == 1 -> throw new WhatTheFException
         if length == 2:   # const lub ID
-            p[0] = AST.Constt(p[1])        # jeszcze nie wiem, jak rozroznic ID...
+            p[0] = p[1]     # teraz, jak mamy nowa klase na ID, to nic nie opakowujemy, ten typ tam jest i nie zniknie
         elif length == 4:
             if p[1] == '(':
                 p[0] = AST.ParenExpr(p[1])
@@ -193,7 +201,7 @@ class Cparser(object):
     def p_expr_list_or_empty(self, p):
         """expr_list_or_empty : expr_list
                               | """
-        if len(p) == 2:
+        if isinstance(p[1], AST.Empty) or p[1] == "":     # ok, prawda jest taka, ze jeszcze nie wiem, ktore z tych dwoch tam bedzie ;)
             p[0] = p[1]
         else:
             p[0] = AST.ExprList()

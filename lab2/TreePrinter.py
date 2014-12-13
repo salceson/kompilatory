@@ -23,9 +23,9 @@ class TreePrinter:
     def printTree(self, indent=0):
         res = indent_char * indent
         res += self.op + '\n'
-        res += self.left.printTree(indent + 1) if isinstance(self.left, AST.Expression)\
+        res += self.left.printTree(indent + 1) if isinstance(self.left, (AST.Expression, AST.Const))\
             else indent_char * (indent + 1) + self.left
-        res += self.right.printTree(indent + 1) if isinstance(self.right, AST.Expression)\
+        res += self.right.printTree(indent + 1) if isinstance(self.right, (AST.Expression, AST.Const))\
             else indent_char * (indent + 1) + self.right
         return res
 
@@ -54,7 +54,7 @@ class TreePrinter:
     def printTree(self, indent=0):
         res = indent * indent_char + "=\n"
         res += indent_char * (indent + 1) + self.var + "\n"
-        res += self.expr.printTree(indent + 1) if isinstance(self.expr, AST.Expression)\
+        res += self.expr.printTree(indent + 1) if isinstance(self.expr, (AST.Expression, AST.Const))\
             else indent_char * (indent + 1) + self.expr
         return res
 
@@ -185,14 +185,14 @@ class TreePrinter:
     @addToClass(AST.ReturnInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "RETURN\n"
-        res += self.expr.printTree(indent + 1) if isinstance(self.expr, AST.Expression)\
+        res += self.expr.printTree(indent + 1) if isinstance(self.expr, (AST.Expression, AST.Const))\
             else (indent + 1) * indent_char + self.expr
         return res
 
     @addToClass(AST.PrintInstr)
     def printTree(self, indent=0):
         res = indent * indent_char + "PRINT\n"
-        res += self.to_print.printTree(indent + 1) if isinstance(self.to_print, AST.Expression)\
+        res += self.to_print.printTree(indent + 1) if isinstance(self.to_print, (AST.Expression, AST.Const))\
             else (indent + 1) * indent_char + self.to_print
         return res
 

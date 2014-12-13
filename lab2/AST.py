@@ -188,7 +188,8 @@ class Assignment(Node):
 
 # Constants
 class Const(Node):
-    pass
+    def __init__(self, val):
+        self.val = val
 
 
 class Integer(Const):

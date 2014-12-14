@@ -4,6 +4,8 @@ from Cparser import Cparser
 from TreePrinter import TreePrinter
 from TypeChecker import TypeChecker
 
+semantic_control = True
+print_tree = False
 
 if __name__ == '__main__':
     TreePrinter()  # Loads printTree definitions
@@ -25,18 +27,19 @@ if __name__ == '__main__':
         print "There were errors in your code. Please correct them."
         exit(1)
 
-    print "Parsing tree:\n"
+    if print_tree:
+        print "Parsing tree:\n"
+        str = ast.printTree()
+        print str
 
-    str = ast.printTree()
-    print str
+    if semantic_control:
+        print "Starting semantic control..."
 
-    print "Starting semantic control..."
+        typeChecker = TypeChecker()
+        typeChecker.visit(ast)
 
-    typeChecker = TypeChecker()
-    typeChecker.visit(ast)
+        print "Done"
 
-    print "Done"
-
-    if typeChecker.errors:
-        print "There were errors in your code. Please correct them."
-        exit(1)
+        if typeChecker.errors:
+            print "There were errors in your code. Please correct them."
+            exit(1)

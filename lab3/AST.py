@@ -3,6 +3,7 @@ class Node(object):
         return self.printTree()
 
 
+#Function definitions
 class Arg(Node):
     def __init__(self, t, idd, lineno):
         self.t = t
@@ -13,7 +14,6 @@ class Arg(Node):
 class ArgList(Node):
     def __init__(self):
         self.arg_list = []
-        self.children = self.arg_list
 
     def append_arg(self, a):
         self.arg_list.append(a)
@@ -24,11 +24,12 @@ class ArgList(Node):
 
 
 class Fundef(Node):
-    def __init__(self, t, id, args_list, comp_instr):
+    def __init__(self, t, id, args_list, comp_instr, lineno):
         self.t = t
         self.id = id
         self.args_list = args_list
         self.comp_instr = comp_instr
+        self.lineno = lineno
 
 
 class FundefList(Node):
@@ -51,6 +52,7 @@ class Empty(Node):
         pass
 
 
+#Expressions
 class ExprList(Node):
     def __init__(self):
         self.expr_list = []
@@ -93,11 +95,13 @@ class BinExpr(Expression):
         self.lineno = lineno
 
 
+#Program
 class Program(Node):
     def __init__(self, declarations, fundefs, instructions):
         self.declarations = declarations
         self.fundefs = fundefs
         self.instructions = instructions
+        self.children = [declarations, fundefs, instructions]
 
 
 class Declarations(Node):
@@ -127,7 +131,6 @@ class Init(Node):
 class Instructions(Node):
     def __init__(self):
         self.instructions = []
-        self.children = self.instructions
 
 
 class LabeledInstruction(Node):

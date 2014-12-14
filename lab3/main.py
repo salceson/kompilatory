@@ -21,13 +21,17 @@ if __name__ == '__main__':
 
     ast = parser.parse(text, lexer=Cparser.scanner)
 
+    print "Parsing tree:\n"
+
     str = ast.printTree()
     print str
 
     print "Starting semantic control..."
 
     typeChecker = TypeChecker()
-    typeChecker.visit(ast)   # or alternatively ast.accept(typeChecker)
+    typeChecker.visit(ast)
 
     print "Done"
 
+    if typeChecker.errors:
+        print "There were errors in your code. Please correct them."

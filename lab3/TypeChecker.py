@@ -24,12 +24,16 @@ types_table['*']['string']['int'] = 'string'
 for op in ['<', '>', '<=', '>=', '==', '!=']:
     types_table[op]['string']['string'] = 'int'
 
+debug = False
+
 
 class NodeVisitor(object):
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, self.generic_visit)
+        if debug:
+            print "Visiting class " + node.__class__.__name__ + " (method: " + visitor.__name__ + ")"
         return visitor(node)
 
     def generic_visit(self, node):
@@ -37,17 +41,39 @@ class NodeVisitor(object):
             for elem in node:
                 self.visit(elem)
         else:
+            c = None
+            #Some hacking due to wrong attributes' names
             try:
                 c = node.children
             except AttributeError:
+                try:
+                    c = node.declarations
+                except AttributeError:
+                    try:
+                        c = node.instructions
+                    except AttributeError:
+                        try:
+                            c = node.arg_list
+                        except AttributeError:
+                            try:
+                                c = node.fundef_list
+                            except AttributeError:
+                                try:
+                                    c = node.inits
+                                except AttributeError:
+                                    c = None
+            if c is None:
                 return
-            for child in node.children:
-                if isinstance(child, list):
-                    for item in child:
-                        if isinstance(item, AST.Node):
-                            self.visit(item)
-                elif isinstance(child, AST.Node):
-                    self.visit(child)
+            if type(c) is not list:
+                self.visit(c)
+            else:
+                for child in c:
+                    if isinstance(child, list):
+                        for item in child:
+                            if isinstance(item, AST.Node):
+                                self.visit(item)
+                    elif isinstance(child, AST.Node):
+                        self.visit(child)
 
 
 class TypeChecker(NodeVisitor):
@@ -86,7 +112,7 @@ class TypeChecker(NodeVisitor):
         else:
             return definition.type
 
-    def visit_Funcall(self, node):
+    def visit_Fundef(self, node):
         f = self.table.get(node.id)
         if f:
             self.errors = True
@@ -101,7 +127,7 @@ class TypeChecker(NodeVisitor):
         else:
             f = FunctionSymbol(node.id, node.t, SymbolTable(self.table, node.id), node.lineno)
             self.table.put(node.id, f)
-            self.current_func = node.id
+            self.current_func = f
             globalTable = self.table
             self.table = self.current_func.table
             if node.args_list is not None:

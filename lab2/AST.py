@@ -3,10 +3,12 @@ class Node(object):
         return self.printTree()
 
 
+#Function definitions
 class Arg(Node):
-    def __init__(self, t, idd):
+    def __init__(self, t, idd, lineno):
         self.t = t
         self.idd = idd
+        self.lineno = lineno
 
 
 class ArgList(Node):
@@ -22,11 +24,12 @@ class ArgList(Node):
 
 
 class Fundef(Node):
-    def __init__(self, t, _id, args_list, comp_instr):
+    def __init__(self, t, id, args_list, comp_instr, lineno):
         self.t = t
-        self._id = _id
+        self.id = id
         self.args_list = args_list
         self.comp_instr = comp_instr
+        self.lineno = lineno
 
 
 class FundefList(Node):
@@ -49,6 +52,7 @@ class Empty(Node):
         pass
 
 
+#Expressions
 class ExprList(Node):
     def __init__(self):
         self.expr_list = []
@@ -66,14 +70,16 @@ class Expression(Node):
 
 
 class Funcall(Expression):
-    def __init__(self, _id, expr_list):
-        self._id = _id
+    def __init__(self, id, expr_list, lineno):
+        self.id = id
         self.expr_list = expr_list
+        self.lineno = lineno
 
 
 class Variable(Expression):
-    def __init__(self, _id):
-        self._id = _id
+    def __init__(self, id, lineno):
+        self.id = id
+        self.lineno = lineno
 
 
 class ParenExpr(Expression):
@@ -82,17 +88,20 @@ class ParenExpr(Expression):
 
 
 class BinExpr(Expression):
-    def __init__(self, op, left, right):
+    def __init__(self, op, left, right, lineno):
         self.op = op
         self.left = left
         self.right = right
+        self.lineno = lineno
 
 
+#Program
 class Program(Node):
     def __init__(self, declarations, fundefs, instructions):
         self.declarations = declarations
         self.fundefs = fundefs
         self.instructions = instructions
+        self.children = [declarations, fundefs, instructions]
 
 
 class Declarations(Node):
@@ -112,9 +121,10 @@ class Inits(Node):
 
 
 class Init(Node):
-    def __init__(self, var_name, expression):
+    def __init__(self, var_name, expression, lineno):
         self.var_name = var_name
         self.expression = expression
+        self.lineno = lineno
 
 
 # Instructions
@@ -124,14 +134,16 @@ class Instructions(Node):
 
 
 class LabeledInstruction(Node):
-    def __init__(self, label, instr):
+    def __init__(self, label, instr, lineno):
         self.label = label
         self.instr = instr
+        self.lineno = lineno
 
 
 class PrintInstr(Node):
-    def __init__(self, to_print):
+    def __init__(self, to_print, lineno):
         self.to_print = to_print
+        self.lineno = lineno
 
 
 class IfInstr(Node):
@@ -160,8 +172,9 @@ class RepeatInstr(Node):
 
 
 class ReturnInstr(Node):
-    def __init__(self, expr):
+    def __init__(self, expr, lineno):
         self.expr = expr
+        self.lineno = lineno
 
 
 class ContinueInstr(Node):
@@ -181,31 +194,29 @@ class CompoundInstr(Node):
 
 
 class Assignment(Node):
-    def __init__(self, var, expr):
+    def __init__(self, var, expr, lineno):
         self.var = var
         self.expr = expr
+        self.lineno = lineno
 
 
 # Constants
 class Const(Node):
-    def __init__(self, val):
+    def __init__(self, val, lineno):
         self.val = val
+        self.lineno = lineno
 
 
 class Integer(Const):
-    def __init__(self, val):
-        Const.__init__(self, val)
+    def __init__(self, val, lineno):
+        Const.__init__(self, val, lineno)
 
 
 class Float(Const):
-    def __init__(self, val):
-        Const.__init__(self, val)
+    def __init__(self, val, lineno):
+        Const.__init__(self, val, lineno)
 
 
 class String(Const):
-    def __init__(self, val):
-        Const.__init__(self, val)
-
-
-class Error(Node):
-    pass
+    def __init__(self, val, lineno):
+        Const.__init__(self, val, lineno)

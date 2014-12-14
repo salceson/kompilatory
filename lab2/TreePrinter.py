@@ -128,10 +128,6 @@ class TreePrinter:
     def printTree(self, indent=0):
         return ""
 
-    @addToClass(AST.Error)
-    def printTree(self, indent=0):
-        return "ERROR\n"    # TODO errory trzeba oblsugiwac i wtedy wypisywac
-
     @addToClass(AST.ExprList)
     def printTree(self, indent=0):
         res = ""
@@ -142,7 +138,7 @@ class TreePrinter:
     @addToClass(AST.Funcall)
     def printTree(self, indent=0):
         res = indent * indent_char + "FUNCALL\n"
-        res += (indent + 1) * indent_char + self._id + "\n"
+        res += (indent + 1) * indent_char + self.id + "\n"
         if self.expr_list is not None:
             res += self.expr_list.printTree(indent+1)
         return res
@@ -150,7 +146,7 @@ class TreePrinter:
     @addToClass(AST.Variable)
     def printTree(self, indent=0):
         res = indent * indent_char
-        res += self._id + '\n'
+        res += self.id + '\n'
         return res
 
     @addToClass(AST.IfInstr)
@@ -220,7 +216,7 @@ class TreePrinter:
     @addToClass(AST.Fundef)
     def printTree(self, indent=0):
         res = indent * indent_char + "FUNDEF\n"
-        res += (indent + 1) * indent_char + self._id + "\n"
+        res += (indent + 1) * indent_char + self.id + "\n"
         res += (indent + 1) * indent_char + "RET " + self.t + "\n"
         res += self.args_list.printTree(indent + 1)
         res += self.comp_instr.printTree(indent + 1)

@@ -8,6 +8,7 @@ class Cparser(object):
     def __init__(self):
         self.scanner = Scanner()
         self.scanner.build()
+        self.errors = False
 
     tokens = Scanner.tokens
 
@@ -27,6 +28,7 @@ class Cparser(object):
     )
 
     def p_error(self, p):
+        self.errors = True
         err_format = "Syntax error at line {0}, column {1}: LexToken({2}, '{3}')"
         if p:
             print(err_format.format(p.lineno, self.scanner.find_tok_column(p), p.type, p.value))

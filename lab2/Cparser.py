@@ -8,6 +8,7 @@ class Cparser(object):
     def __init__(self):
         self.scanner = Scanner()
         self.scanner.build()
+        self.errors = False
 
     tokens = Scanner.tokens
 
@@ -27,6 +28,7 @@ class Cparser(object):
     )
 
     def p_error(self, p):
+        self.errors = True
         err_format = "Syntax error at line {0}, column {1}: LexToken({2}, '{3}')"
         if p:
             print(err_format.format(p.lineno, self.scanner.find_tok_column(p), p.type, p.value))
@@ -69,7 +71,7 @@ class Cparser(object):
 
     def p_init(self, p):
         """init : ID '=' expression """
-        p[0] = AST.Init(p[1], p[3])
+        p[0] = AST.Init(p[1], p[3], p.lineno(1))
 
     def p_instructions(self, p):
         """instructions : instructions instruction
@@ -97,15 +99,15 @@ class Cparser(object):
     def p_print_instr(self, p):
         """print_instr : PRINT expression ';'
                        | PRINT error ';' """
-        p[0] = AST.PrintInstr(p[2])
+        p[0] = AST.PrintInstr(p[2], p.lineno(1))
 
     def p_labeled_instr(self, p):
         """labeled_instr : ID ':' instruction """
-        p[0] = AST.LabeledInstruction(p[1], p[3])
+        p[0] = AST.LabeledInstruction(p[1], p[3], p.lineno(1))
 
     def p_assignment(self, p):
         """assignment : ID '=' expression ';' """
-        p[0] = AST.Assignment(p[1], p[3])
+        p[0] = AST.Assignment(p[1], p[3], p.lineno(1))
 
     def p_choice_instr(self, p):
         """choice_instr : IF '(' condition ')' instruction  %prec IFX
@@ -128,7 +130,7 @@ class Cparser(object):
 
     def p_return_instr(self, p):
         """return_instr : RETURN expression ';' """
-        p[0] = AST.ReturnInstr(p[2])
+        p[0] = AST.ReturnInstr(p[2], p.lineno(1))
 
     def p_continue_instr(self, p):
         """continue_instr : CONTINUE ';' """
@@ -150,19 +152,20 @@ class Cparser(object):
         """const : INTEGER
                  | FLOAT
                  | STRING"""
+        lineno = p.lineno(1)
         try:
             int(p[1])
-            p[0] = AST.Integer(p[1])
+            p[0] = AST.Integer(p[1], lineno)
         except ValueError:
             try:
                 float(p[1])
-                p[0] = AST.Float(p[1])
+                p[0] = AST.Float(p[1], lineno)
             except ValueError:
-                p[0] = AST.String(p[1])
+                p[0] = AST.String(p[1], lineno)
 
     def p_id_expr(self, p):
         """expression : ID"""
-        p[0] = AST.Variable(p[1])
+        p[0] = AST.Variable(p[1], p.lineno(1))
 
     def p_const_expr(self, p):
         """expression : const"""
@@ -176,7 +179,7 @@ class Cparser(object):
     def p_funcall(self, p):
         """expression : ID '(' expr_list_or_empty ')'
                       | ID '(' error ')' """
-        p[0] = AST.Funcall(p[1], p[3])
+        p[0] = AST.Funcall(p[1], p[3], p.lineno(1))
 
     def p_bin_expression(self, p):
         """expression : expression '+' expression
@@ -197,7 +200,7 @@ class Cparser(object):
                       | expression '<' expression
                       | expression LE expression
                       | expression GE expression"""
-        p[0] = AST.BinExpr(p[2], p[1], p[3])  # operator pierwszy
+        p[0] = AST.BinExpr(p[2], p[1], p[3], p.lineno(2))  # operator pierwszy
 
     def p_expr_list_or_empty(self, p):
         """expr_list_or_empty : expr_list
@@ -224,7 +227,7 @@ class Cparser(object):
 
     def p_fundef(self, p):
         """fundef : TYPE ID '(' args_list_or_empty ')' compound_instr """
-        p[0] = AST.Fundef(p[1], p[2], p[4], p[6])
+        p[0] = AST.Fundef(p[1], p[2], p[4], p[6], p.lineno(1))
 
     def p_args_list_or_empty(self, p):
         """args_list_or_empty : args_list
@@ -245,4 +248,4 @@ class Cparser(object):
 
     def p_arg(self, p):
         """arg : TYPE ID """
-        p[0] = AST.Arg(p[1], p[2])
+        p[0] = AST.Arg(p[1], p[2], p.lineno(1))

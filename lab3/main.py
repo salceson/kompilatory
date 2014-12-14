@@ -15,11 +15,15 @@ if __name__ == '__main__':
         print("Cannot open {0} file".format(filename))
         sys.exit(0)
 
-    Cparser = Cparser()
-    parser = yacc.yacc(module=Cparser)
+    c_parser = Cparser()
+    parser = yacc.yacc(module=c_parser)
     text = file.read()
 
-    ast = parser.parse(text, lexer=Cparser.scanner)
+    ast = parser.parse(text, lexer=c_parser.scanner)
+
+    if c_parser.errors:
+        print "There were errors in your code. Please correct them."
+        exit(1)
 
     print "Parsing tree:\n"
 

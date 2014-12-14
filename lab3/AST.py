@@ -220,7 +220,3 @@ class Float(Const):
 class String(Const):
     def __init__(self, val, lineno):
         Const.__init__(self, val, lineno)
-
-
-class Error(Node):
-    pass

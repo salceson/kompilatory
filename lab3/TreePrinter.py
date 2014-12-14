@@ -128,10 +128,6 @@ class TreePrinter:
     def printTree(self, indent=0):
         return ""
 
-    @addToClass(AST.Error)
-    def printTree(self, indent=0):
-        return "ERROR\n"    # TODO errory trzeba oblsugiwac i wtedy wypisywac
-
     @addToClass(AST.ExprList)
     def printTree(self, indent=0):
         res = ""

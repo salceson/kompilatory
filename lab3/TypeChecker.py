@@ -135,16 +135,17 @@ class TypeChecker(NodeVisitor):
             self.current_func = None
 
     def visit_Assignment(self, node):
-        definition = self.table.getGlobal(node.id)
+        definition = self.table.getGlobal(node.var)
         t = self.visit(node.expr)
         if definition is None:
             self.errors = True
-            print "Undefined symbol: {0} at line {1}".format(node.id, node.lineno)
+            print "Undefined symbol: {0} at line {1}".format(node.var, node.lineno)
         elif t != definition.type:
             self.errors = True
             print "Wrong assignment type for symbol: {0}: symbol's type is {1}," \
-                  " tried to assign type {2} at line {3}.".format(node.id, definition.type,
-                                                                  t, node.lineno)
+                  " tried to assign type {2} at line {3}.".format(node.var, definition.type,
+                                                                  t if t is not None else "undefined",
+                                                                  node.lineno)
 
     def visit_Declaration(self, node):
         self.current_type = node.declaration_type
@@ -185,3 +186,11 @@ class TypeChecker(NodeVisitor):
         for arg in node.arg_list:
             self.visit(arg)
         self.current_func.extract_args()
+
+    def visit_CompoundInstr(self, node):
+        innerTable = SymbolTable(self.table, "CompoundScope")
+        prevTable = self.table
+        self.table = innerTable
+        self.visit(node.decls)
+        self.visit(node.instrs)
+        self.table = prevTable

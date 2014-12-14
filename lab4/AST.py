@@ -3,8 +3,8 @@ import string
 
 
 class Node(object):
-    def accept(self, visitor):
-        return visitor.visit(self)
+    def accept(self, visitor, create_memory=True):
+        return visitor.visit(self, create_memory)
 
 
 #Function definitions

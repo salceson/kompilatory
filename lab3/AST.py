@@ -85,6 +85,7 @@ class Variable(Expression):
 class ParenExpr(Expression):
     def __init__(self, expr_or_err):
         self.expression = expr_or_err
+        self.children = expr_or_err
 
 
 class BinExpr(Expression):

@@ -160,16 +160,28 @@ class TypeChecker(NodeVisitor):
             self.errors = self.errors or not warning
             print "{0}Initialization to symbol {1}: symbol's type is {2}," \
                   " tried to assign type {3} at line {4}".format("Warning: " if Warning else "",
-                                                                node.var_name, self.current_type,
-                                                                t, node.lineno)
+                                                                 node.var_name, self.current_type,
+                                                                 t, node.lineno)
         definition = self.table.get(node.var_name)
         if definition is not None:
             self.errors = True
-            print "Variable {0} is alread defined at line {2}. Redefinition at line {1}.".format(
-                node.var_name, node.lineno, definition.lineno
+            print "Variable {0} is already defined at line {1}. Redefinition at line {2}.".format(
+                node.var_name, definition.lineno, node.lineno
             )
         else:
             self.table.put(node.var_name, VariableSymbol(node.var_name, self.current_type, node.lineno))
 
     def visit_Arg(self, node):
-        pass
+        definition = self.table.get(node.idd)
+        if definition is not None:
+            self.errors = True
+            print "Argument {0} is already defined at line {1}. Redefinition at line {2}.".format(
+                node.idd, definition.lineno, node.lineno
+            )
+        else:
+            self.table.put(node.idd, VariableSymbol(node.idd, node.t, node.lineno))
+
+    def visit_ArgList(self, node):
+        for arg in node.arg_list:
+            self.visit(arg)
+        self.current_func.extract_args()

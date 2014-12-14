@@ -16,10 +16,6 @@ class Memory:
         return self.name
 
 
-class NoMemoryError(RuntimeError):
-    pass
-
-
 class MemoryStack:
     def __init__(self, memory=None):
         self.stack = []

@@ -1,6 +1,7 @@
 
 float a = 0, b = 0, c = 0;
 int d = 0;
+string troll = "troll";
 
 int test() {
     return 1;
@@ -56,3 +57,11 @@ while(a >= b ) {
 d = gcd(10.0, 10);
 
 c = test2(2);
+
+c = test2("troll");
+
+c = test2(troll);
+
+d = gcd(10, troll);
+
+c = gcd(a, b);

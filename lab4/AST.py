@@ -2,6 +2,9 @@ class Node(object):
     def __str__(self):
         return self.printTree()
 
+    def accept(self, visitor):
+        return visitor.visit(self)
+
 
 #Function definitions
 class Arg(Node):
@@ -25,7 +28,7 @@ class ArgList(Node):
 
 class Fundef(Node):
     def __init__(self, t, id, args_list, comp_instr, lineno):
-        self.t = t
+        self.t = vt
         self.id = id
         self.args_list = args_list
         self.comp_instr = comp_instr

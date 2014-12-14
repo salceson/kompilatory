@@ -24,11 +24,10 @@ types_table['*']['string']['int'] = 'string'
 for op in ['<', '>', '<=', '>=', '==', '!=']:
     types_table[op]['string']['string'] = 'int'
 
-debug = False
+debug = True
 
 
 class NodeVisitor(object):
-
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, self.generic_visit)
@@ -41,7 +40,7 @@ class NodeVisitor(object):
             for elem in node:
                 self.visit(elem)
         else:
-            #Some hacking due to wrong attributes' names
+            # Some hacking due to wrong attributes' names
             try:
                 children = node.children
             except AttributeError:
@@ -136,4 +135,42 @@ class TypeChecker(NodeVisitor):
             self.current_func = None
 
     def visit_Assignment(self, node):
+        definition = self.table.getGlobal(node.id)
+        t = self.visit(node.expr)
+        if definition is None:
+            self.errors = True
+            print "Undefined symbol: {0} at line {1}".format(node.id, node.lineno)
+        elif t != definition.type:
+            self.errors = True
+            print "Wrong assignment type for symbol: {0}: symbol's type is {1}," \
+                  " tried to assign type {2} at line {3}.".format(node.id, definition.type,
+                                                                  t, node.lineno)
+
+    def visit_Declaration(self, node):
+        self.current_type = node.declaration_type
+        self.visit(node.inits)
+        self.current_type = ""
+
+
+    def visit_Init(self, node):
+        t = self.visit(node.expression)
+        if t != self.current_type:
+            warning = False
+            if t == "int" and self.current_type == "float":
+                warning = True
+            self.errors = self.errors or not warning
+            print "{0}Initialization to symbol {1}: symbol's type is {2}," \
+                  " tried to assign type {3} at line {4}".format("Warning: " if Warning else "",
+                                                                node.var_name, self.current_type,
+                                                                t, node.lineno)
+        definition = self.table.get(node.var_name)
+        if definition is not None:
+            self.errors = True
+            print "Redefinition of symbol {0} at line {1}. Previously defined at line {2}.".format(
+                node.var_name, node.lineno, definition.lineno
+            )
+        else:
+            self.table.put(node.var_name, VariableSymbol(node.var_name, self.current_type, node.lineno))
+
+    def visit_Arg(self, node):
         pass

@@ -5,7 +5,7 @@ int gcd(int m, int n) {
 
 int res = 0;
 string d = "Test";
-string a;
+string a = "Troll";
 
 a = d / res;
 

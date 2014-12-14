@@ -53,9 +53,8 @@ if __name__ == "__main__":
     memstack.push(memory)
     memstack.set("troll", 10.0)
     print memstack.get("troll")
-    try:
-        memstack.get("d")
-    except KeyError:
+    d = memstack.get("d")
+    if d is None:
         print "OK (no key)"
     mem = memstack.pop()
     if mem == memory:

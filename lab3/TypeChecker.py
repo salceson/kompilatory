@@ -1,28 +1,28 @@
 #!/usr/bin/python
 from collections import defaultdict
-from SymbolTable import SymbolTable, FunctionSymbol
+from SymbolTable import SymbolTable, FunctionSymbol, VariableSymbol
 import AST
 
-ttype = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None)))
+types_table = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None)))
 
 for op in ['+', '-', '*', '/', '%', '<', '>', '<<', '>>', '|', '&', '^', '<=', '>=', '==', '!=']:
-    ttype[op]['int']['int'] = 'int'
+    types_table[op]['int']['int'] = 'int'
 
 for op in ['+', '-', '*', '/']:
-    ttype[op]['int']['float'] = 'float'
-    ttype[op]['float']['int'] = 'float'
-    ttype[op]['float']['float'] = 'float'
+    types_table[op]['int']['float'] = 'float'
+    types_table[op]['float']['int'] = 'float'
+    types_table[op]['float']['float'] = 'float'
 
 for op in ['<', '>', '<=', '>=', '==', '!=']:
-    ttype[op]['int']['float'] = 'int'
-    ttype[op]['float']['int'] = 'int'
-    ttype[op]['float']['float'] = 'int'
+    types_table[op]['int']['float'] = 'int'
+    types_table[op]['float']['int'] = 'int'
+    types_table[op]['float']['float'] = 'int'
 
-ttype['+']['string']['string'] = 'string'
-ttype['*']['string']['int'] = 'string'
+types_table['+']['string']['string'] = 'string'
+types_table['*']['string']['int'] = 'string'
 
 for op in ['<', '>', '<=', '>=', '==', '!=']:
-    ttype[op]['string']['string'] = 'int'
+    types_table[op]['string']['string'] = 'int'
 
 
 class NodeVisitor(object):
@@ -32,7 +32,7 @@ class NodeVisitor(object):
         visitor = getattr(self, method, self.generic_visit)
         return visitor(node)
 
-    def generic_visit(self, node):        # Called if no explicit visitor function exists for a node.
+    def generic_visit(self, node):
         if isinstance(node, list):
             for elem in node:
                 self.visit(elem)
@@ -55,13 +55,15 @@ class TypeChecker(NodeVisitor):
         self.table = SymbolTable(None, "root")
         self.current_type = ""
         self.current_func = None
+        self.errors = False
 
     def visit_BinExpr(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
         op = node.op
-        t = ttype[op][left][right]
+        t = types_table[op][left][right]
         if t is None:
+            self.errors = True
             print "Cannot perform operation {0} between types {1} and {2} at line {3}".format(
                 op, left, right, node.lineno
             )
@@ -79,6 +81,7 @@ class TypeChecker(NodeVisitor):
     def visit_Variable(self, node):
         definition = self.table.getGlobal(node.id)
         if definition is None:
+            self.errors = True
             print "Undefined symbol {0} in line {1}.".format(node.id, node.lineno)
         else:
             return definition.type
@@ -86,12 +89,13 @@ class TypeChecker(NodeVisitor):
     def visit_Funcall(self, node):
         f = self.table.get(node.id)
         if f:
+            self.errors = True
             if type(f) == FunctionSymbol:
                 print "Function {0} is already defined at line {1}. Redefinition at line {2}.".format(
                     node.id, f.lineno, node.lineno
                 )
             else:
-                print "Redefinition of name {0} (previously defined at line {1}). Redefinition at line {2}.".format(
+                print "Name {0} is already defined at line {1}. Redefinition at line {2}.".format(
                     node.id, f.lineno, node.lineno
                 )
         else:

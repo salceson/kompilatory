@@ -127,6 +127,7 @@ class Init(Node):
 class Instructions(Node):
     def __init__(self):
         self.instructions = []
+        self.children = self.instructions
 
 
 class LabeledInstruction(Node):

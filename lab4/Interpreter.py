@@ -1,11 +1,15 @@
+import re
+import string
 import AST
-import SymbolTable
 from Memory import *
 from Exceptions import *
 from visit import *
 
 
 class Interpreter(object):
+    def __init__(self):
+        self.memory_stack = MemoryStack()
+
     @on('node')
     def visit(self, node):
         pass
@@ -20,10 +24,6 @@ class Interpreter(object):
     @when(AST.ParenExpr)
     def visit(self, node):
         return node.expression.accept(self)
-
-    @when(AST.Assignment)
-    def visit(self, node):
-        pass
 
     @when(AST.WhileInstr)
     def visit(self, node):
@@ -68,3 +68,113 @@ class Interpreter(object):
     def visit(self, node):
         for instr in node.instructions:
             instr.accept(self)
+
+    @when(AST.CompoundInstr)
+    def visit(self, node):
+        self.memory_stack.push(Memory("inner"))
+        node.decls.accept(self)
+        node.instrs.accept(self)
+        self.memory_stack.pop()
+
+    @when(AST.Fundef)
+    def visit(self, node):
+        self.memory_stack.peek().put(node.id, node)
+
+    @when(AST.Funcall)
+    def visit(self, node):
+        fun = self.memory_stack.get(node.id)
+        fun_memory = Memory(node.id)
+        for arg_expression, actual_arg in zip(node.expr_list.expr_list, fun.args_list.arg_list):
+            fun_memory.put(actual_arg.accept(self), arg_expression.accept(self))
+        self.memory_stack.push(fun_memory)
+        try:
+            fun.comp_instr.accept(self)
+        except ReturnValueException as e:
+            return e.value
+        finally:
+            self.memory_stack.pop()
+
+    @when(AST.Arg)
+    def visit(self, node):
+        return node.idd
+
+    @when(AST.ArgList)
+    def visit(self, node):
+        for arg in node.arg_list:
+            arg.accept(self)
+
+    @when(AST.Assignment)
+    def visit(self, node):
+        expr = node.expr.accept(self)
+        self.memory_stack.set(node.var, expr)
+        return expr
+
+    @when(AST.BreakInstr)
+    def visit(self, node):
+        raise BreakException()
+
+    @when(AST.ContinueInstr)
+    def visit(self, node):
+        raise ContinueException()
+
+    @when(AST.Declaration)
+    def visit(self, node):
+        node.inits.accept(self)
+
+    @when(AST.Declarations)
+    def visit(self, node):
+        for declaration in node.declarations:
+            declaration.accept(self)
+
+    @when(AST.Init)
+    def visit(self, node):
+        expr = node.expression.accept(self)
+        self.memory_stack.peek().put(node.var_name, expr)
+        return expr
+
+    @when(AST.Inits)
+    def visit(self, node):
+        for init in node.inits:
+            init.accept(self)
+
+    @when(AST.LabeledInstruction)
+    def visit(self, node):
+        return node.instr.accept(self)
+
+    @when(AST.Integer)
+    def visit(self, node):
+        return int(node.val)
+
+    @when(AST.Float)
+    def visit(self, node):
+        return float(node.val)
+
+    @when(AST.String)
+    def visit(self, node):
+        return node.val
+
+    @when(AST.PrintInstr)
+    def visit(self, node):
+        to_print = str(node.to_print.accept(self))
+        re.match(r'\"\w+\"', to_print)
+        to_print = string.replace(string.replace(to_print, r'"', "", 1), r'"', "", -1)
+        print to_print
+
+    @when(AST.ReturnInstr)
+    def visit(self, node):
+        raise ReturnValueException(node.expr.accept(self))
+
+    @when(AST.Variable)
+    def visit(self, node):
+        return self.memory_stack.get(node.id)
+
+    @when(AST.FundefList)
+    def visit(self, node):
+        for fundef in node.fundef_list:
+            fundef.accept(self)
+
+    @when(AST.Program)
+    def visit(self, node):
+        node.declarations.accept(self)
+        node.fundefs.accept(self)
+        node.instructions.accept(self)

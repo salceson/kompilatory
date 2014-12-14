@@ -1,7 +1,8 @@
-class Node(object):
-    def __str__(self):
-        return self.printTree()
+import re
+import string
 
+
+class Node(object):
     def accept(self, visitor):
         return visitor.visit(self)
 

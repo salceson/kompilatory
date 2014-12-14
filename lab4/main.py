@@ -6,8 +6,10 @@ from Interpreter import Interpreter
 from TreePrinter import TreePrinter
 
 print_tree = False
+verbose = False
 
 if __name__ == '__main__':
+    sys.setrecursionlimit(10000)
 
     try:
         filename = sys.argv[1] if len(sys.argv) > 1 else "example.txt"
@@ -21,7 +23,9 @@ if __name__ == '__main__':
     parser = yacc.yacc(module=cparser)
     text = file.read()
     ast = parser.parse(text, lexer=cparser.scanner)
-    print "Parsing file..."
+    if verbose:
+        print "Parsing file..."
+
     if cparser.errors:
         print "There were errors while parsing file {0}.".format(filename)
         print "Please correct them."
@@ -29,10 +33,13 @@ if __name__ == '__main__':
 
     if print_tree:
         tp = TreePrinter()
-        print "Parsing tree:"
+        if verbose:
+            print "Parsing tree:"
         print ast.printTree()
 
-    print "Performing semantic control..."
+    if verbose:
+        print "Performing semantic control..."
+
     typeChecker = TypeChecker()
     typeChecker.visit(ast)
 
@@ -41,5 +48,6 @@ if __name__ == '__main__':
         print "Please correct them."
         exit(2)
 
-    print "Interpreting..."
+    if verbose:
+        print "Interpreting..."
     ast.accept(Interpreter())

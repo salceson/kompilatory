@@ -22,8 +22,10 @@ class MemoryStack:
         self.stack.append(memory if memory else Memory("TopLevelMemory"))
 
     def get(self, name):
-        for i in xrange(1, len(self.stack)+1):
-            if self.stack[len(self.stack)-i].has_key(name):
+        indices = range(0, len(self.stack))
+        indices.reverse()
+        for i in indices:
+            if self.stack[i].has_key(name):
                 return self.stack[i].get(name)
         return None
 
@@ -31,8 +33,10 @@ class MemoryStack:
         self.stack[-1].put(name, value)
 
     def set(self, name, value):
-        for i in xrange(1, len(self.stack)+1):
-            if self.stack[len(self.stack)-i].has_key(name):
+        indices = range(0, len(self.stack))
+        indices.reverse()
+        for i in indices:
+            if self.stack[i].has_key(name):
                 self.stack[i].put(name, value)
                 break
 

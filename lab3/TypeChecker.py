@@ -151,7 +151,6 @@ class TypeChecker(NodeVisitor):
         self.visit(node.inits)
         self.current_type = ""
 
-
     def visit_Init(self, node):
         t = self.visit(node.expression)
         if t != self.current_type:
@@ -166,7 +165,7 @@ class TypeChecker(NodeVisitor):
         definition = self.table.get(node.var_name)
         if definition is not None:
             self.errors = True
-            print "Redefinition of symbol {0} at line {1}. Previously defined at line {2}.".format(
+            print "Variable {0} is alread defined at line {2}. Redefinition at line {1}.".format(
                 node.var_name, node.lineno, definition.lineno
             )
         else:

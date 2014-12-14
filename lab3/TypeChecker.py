@@ -213,9 +213,37 @@ class TypeChecker(NodeVisitor):
 
     def visit_Funcall(self, node):
         fundef = self.table.getGlobal(node.id)
-        if fundef is None:
-            pass
-        pass
+        if fundef is None or not isinstance(fundef, FunctionSymbol):
+            self.errors = True
+            print "Undefined function: {0} at line {1}.".format(node.id, node.lineno)
+            return None
+        if node.expr_list is None:
+            if len(fundef.args) != 0:
+                self.errors = True
+                print "No arguments passed to {0}-argument function {1} at line {2}.".format(
+                    len(fundef.args), fundef.name, node.lineno
+                )
+            return fundef.type
+        else:
+            if len(fundef.args) != len(node.expr_list.expr_list):
+                self.errors = True
+                print "Wrong number of arguments ({0}) passed to function {1} (expected: {2}) at line {3}.".format(
+                    len(node.expr_list.expr_list), node.id, len(fundef.args), node.lineno)
+            else:
+                types = [self.visit(x) for x in node.expr_list.expr_list]
+                expectedTypes = fundef.args
+                i = 1
+                for actual, expected in zip(types, expectedTypes):
+                    if actual != expected.type:
+                        warning = False
+                        if actual == "int" and expected.type == "float":
+                            warning = True
+                        self.errors = self.errors or not warning
+                        print "{0}Argument type mismatch (index: {1}, expected: {2}, got: {3}) at line {4}".format(
+                            "Warning: " if warning else "", i, expected.type, actual, node.lineno
+                        )
+                    i += 1
+                return fundef.type
 
     def visit_ParenExpr(self, node):
         return self.visit(node.expression)

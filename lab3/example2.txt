@@ -1,5 +1,10 @@
 
 float a = 0, b = 0, c = 0;
+int d = 0;
+
+int test() {
+    return 1;
+}
 
 int gcd(int m, int n) {
 
@@ -38,6 +43,16 @@ print res;
 return res;
 }
 
+float test2(float arg){
+    return arg;
+}
+
+d = test();
+
 while(a >= b ) {
     a = 1/2*(a+b/a);
 }
+
+d = gcd(10.0, 10);
+
+c = test2(2);

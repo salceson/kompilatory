@@ -1,27 +1,63 @@
-
 class Memory:
+    def __init__(self, name):
+        self.name = name
+        self.memory = {}
 
-    def __init__(self, name): # memory name
+    def has_key(self, name):
+        return self.memory.has_key(name)
 
-    def has_key(self, name):  # variable name
+    def get(self, name):
+        return self.memory.get(name)
 
-    def get(self, name):         # get from memory current value of variable <name>
+    def put(self, name, value):
+        self.memory[name] = value
 
-    def put(self, name, value):  # puts into memory current value of variable <name>
+
+class NoMemoryError(RuntimeError):
+    pass
 
 
 class MemoryStack:
 
-    def __init__(self, memory=None): # initialize memory stack with memory <memory>
+    def __init__(self, memory=None):
+        self.memory = memory
+        self.stack = []
+        if memory:
+            self.stack.append(memory)
 
-    def get(self, name):             # get from memory stack current value of variable <name>
+    def get(self, name):
+        if self.memory is None:
+            raise NoMemoryError()
+        return self.memory.get(name)
 
-    def insert(self, name, value): # inserts into memory stack variable <name> with value <value>
+    def insert(self, name, value):
+        if self.memory is not None:
+            self.memory.put(name, value)
 
-    def set(self, name, value): # sets variable <name> to value <value>
+    def set(self, name, value):
+        if self.memory is None:
+            raise NoMemoryError()
+        self.memory.memory[name] = value
 
-    def push(self, memory): # push memory <memory> onto the stack
+    def push(self, memory):
+        self.memory = memory
+        self.stack.append(memory)
 
-    def pop(self):          # pops the top memory from the stack
+    def pop(self):
+        return self.stack.pop()
 
 
+if __name__ == "__main__":
+    memstack = MemoryStack()
+    memory = Memory("test")
+    memstack.push(memory)
+    memstack.set("troll", 10.0)
+    print memstack.get("troll")
+    try:
+        memstack.get("d")
+    except KeyError:
+        print "OK (no key)"
+    mem = memstack.pop()
+    if mem == memory:
+        print "OK (mem)"
+    print memstack.stack

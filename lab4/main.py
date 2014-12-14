@@ -3,7 +3,9 @@ import ply.yacc as yacc
 from Cparser import Cparser
 from TypeChecker import TypeChecker
 from Interpreter import Interpreter
+from TreePrinter import TreePrinter
 
+print_tree = False
 
 if __name__ == '__main__':
 
@@ -24,6 +26,11 @@ if __name__ == '__main__':
         print "There were errors while parsing file {0}.".format(filename)
         print "Please correct them."
         exit(1)
+
+    if print_tree:
+        tp = TreePrinter()
+        print "Parsing tree:"
+        print ast.printTree()
 
     print "Performing semantic control..."
     typeChecker = TypeChecker()

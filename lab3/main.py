@@ -39,3 +39,4 @@ if __name__ == '__main__':
 
     if typeChecker.errors:
         print "There were errors in your code. Please correct them."
+        exit(1)

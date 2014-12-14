@@ -60,3 +60,6 @@ target/
 #PLY files
 parser.out
 parsetab.py
+
+#Tests out files
+*.actual

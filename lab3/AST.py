@@ -4,14 +4,16 @@ class Node(object):
 
 
 class Arg(Node):
-    def __init__(self, t, idd):
+    def __init__(self, t, idd, lineno):
         self.t = t
         self.idd = idd
+        self.lineno = lineno
 
 
 class ArgList(Node):
     def __init__(self):
         self.arg_list = []
+        self.children = self.arg_list
 
     def append_arg(self, a):
         self.arg_list.append(a)
@@ -84,10 +86,11 @@ class ParenExpr(Expression):
 
 
 class BinExpr(Expression):
-    def __init__(self, op, left, right):
+    def __init__(self, op, left, right, lineno):
         self.op = op
         self.left = left
         self.right = right
+        self.lineno = lineno
 
 
 class Program(Node):
@@ -114,9 +117,10 @@ class Inits(Node):
 
 
 class Init(Node):
-    def __init__(self, var_name, expression):
+    def __init__(self, var_name, expression, lineno):
         self.var_name = var_name
         self.expression = expression
+        self.lineno = lineno
 
 
 # Instructions
@@ -126,14 +130,16 @@ class Instructions(Node):
 
 
 class LabeledInstruction(Node):
-    def __init__(self, label, instr):
+    def __init__(self, label, instr, lineno):
         self.label = label
         self.instr = instr
+        self.lineno = lineno
 
 
 class PrintInstr(Node):
-    def __init__(self, to_print):
+    def __init__(self, to_print, lineno):
         self.to_print = to_print
+        self.lineno = lineno
 
 
 class IfInstr(Node):
@@ -162,8 +168,9 @@ class RepeatInstr(Node):
 
 
 class ReturnInstr(Node):
-    def __init__(self, expr):
+    def __init__(self, expr, lineno):
         self.expr = expr
+        self.lineno = lineno
 
 
 class ContinueInstr(Node):
@@ -183,9 +190,10 @@ class CompoundInstr(Node):
 
 
 class Assignment(Node):
-    def __init__(self, var, expr):
+    def __init__(self, var, expr, lineno):
         self.var = var
         self.expr = expr
+        self.lineno = lineno
 
 
 # Constants

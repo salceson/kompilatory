@@ -158,7 +158,7 @@ class Cparser(object):
                 float(p[1])
                 p[0] = AST.Float(p[1])
             except ValueError:
-                p[0] = AST.String[p[1]]
+                p[0] = AST.String(p[1])
 
     def p_id_expr(self, p):
         """expression : ID"""

@@ -66,14 +66,16 @@ class Expression(Node):
 
 
 class Funcall(Expression):
-    def __init__(self, _id, expr_list):
+    def __init__(self, _id, expr_list, lineno):
         self._id = _id
         self.expr_list = expr_list
+        self.lineno = lineno
 
 
 class Variable(Expression):
-    def __init__(self, _id):
+    def __init__(self, _id, lineno):
         self._id = _id
+        self.lineno = lineno
 
 
 class ParenExpr(Expression):
@@ -188,23 +190,24 @@ class Assignment(Node):
 
 # Constants
 class Const(Node):
-    def __init__(self, val):
+    def __init__(self, val, lineno):
         self.val = val
+        self.lineno = lineno
 
 
 class Integer(Const):
-    def __init__(self, val):
-        Const.__init__(self, val)
+    def __init__(self, val, lineno):
+        Const.__init__(self, val, lineno)
 
 
 class Float(Const):
-    def __init__(self, val):
-        Const.__init__(self, val)
+    def __init__(self, val, lineno):
+        Const.__init__(self, val, lineno)
 
 
 class String(Const):
-    def __init__(self, val):
-        Const.__init__(self, val)
+    def __init__(self, val, lineno):
+        Const.__init__(self, val, lineno)
 
 
 class Error(Node):

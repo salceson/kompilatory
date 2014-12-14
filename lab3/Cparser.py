@@ -150,19 +150,20 @@ class Cparser(object):
         """const : INTEGER
                  | FLOAT
                  | STRING"""
+        lineno = p.lineno(1)
         try:
             int(p[1])
-            p[0] = AST.Integer(p[1])
+            p[0] = AST.Integer(p[1], lineno)
         except ValueError:
             try:
                 float(p[1])
-                p[0] = AST.Float(p[1])
+                p[0] = AST.Float(p[1], lineno)
             except ValueError:
-                p[0] = AST.String[p[1]]
+                p[0] = AST.String(p[1], lineno)
 
     def p_id_expr(self, p):
         """expression : ID"""
-        p[0] = AST.Variable(p[1])
+        p[0] = AST.Variable(p[1], p.lineno(1))
 
     def p_const_expr(self, p):
         """expression : const"""
@@ -176,7 +177,7 @@ class Cparser(object):
     def p_funcall(self, p):
         """expression : ID '(' expr_list_or_empty ')'
                       | ID '(' error ')' """
-        p[0] = AST.Funcall(p[1], p[3])
+        p[0] = AST.Funcall(p[1], p[3], p.lineno(1))
 
     def p_bin_expression(self, p):
         """expression : expression '+' expression

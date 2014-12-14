@@ -17,7 +17,8 @@ if __name__ == '__main__':
     Cparser = Cparser()
     parser = yacc.yacc(module=Cparser)
     text = file.read()
-    program = parser.parse(text, lexer=Cparser.scanner)
-    str = program.printTree()
+    ast = parser.parse(text, lexer=Cparser.scanner)
+    str = ast.printTree()
     print str
+    print "Starting semantic control..."
 

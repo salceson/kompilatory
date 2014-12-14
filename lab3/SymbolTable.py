@@ -14,12 +14,6 @@ class VariableSymbol(Symbol):
         self.type = type
 
 
-class ConstSymbol(Symbol):
-    def __init__(self, name, type):
-        self.name = name
-        self.type = type
-
-
 class FuncCallSymbol(Symbol):
     def __init__(self, name, type, table):
         self.name = name

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from collections import defaultdict
-from SymbolTable import SymbolTable
+from SymbolTable import SymbolTable, FunctionSymbol
 import AST
 
 ttype = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None)))
@@ -32,7 +32,6 @@ class NodeVisitor(object):
         visitor = getattr(self, method, self.generic_visit)
         return visitor(node)
 
-
     def generic_visit(self, node):        # Called if no explicit visitor function exists for a node.
         if isinstance(node, list):
             for elem in node:
@@ -61,9 +60,12 @@ class TypeChecker(NodeVisitor):
         left = self.visit(node.left)
         right = self.visit(node.right)
         op = node.op
-        if ttype[op][left][right] is None:
-            print "Bad expression {0} in line {1}".format(op, node.lineno)
-        return ttype[op][left][right]
+        t = ttype[op][left][right]
+        if t is None:
+            print "Cannot perform operation {0} between types {1} and {2} at line {3}".format(
+                op, left, right, node.lineno
+            )
+        return t
 
     def visit_Integer(self, node):
         return 'int'
@@ -75,11 +77,34 @@ class TypeChecker(NodeVisitor):
         return 'string'
 
     def visit_Variable(self, node):
-        definition = self.table.getGlobal(node._id)
+        definition = self.table.getGlobal(node.id)
         if definition is None:
-            print "Undefined symbol {0} in line {1}.".format(node._id, node.lineno)
+            print "Undefined symbol {0} in line {1}.".format(node.id, node.lineno)
         else:
             return definition.type
 
     def visit_Funcall(self, node):
+        f = self.table.get(node.id)
+        if f:
+            if type(f) == FunctionSymbol:
+                print "Function {0} is already defined at line {1}. Redefinition at line {2}.".format(
+                    node.id, f.lineno, node.lineno
+                )
+            else:
+                print "Redefinition of name {0} (previously defined at line {1}). Redefinition at line {2}.".format(
+                    node.id, f.lineno, node.lineno
+                )
+        else:
+            f = FunctionSymbol(node.id, node.t, SymbolTable(self.table, node.id), node.lineno)
+            self.table.put(node.id, f)
+            self.current_func = node.id
+            globalTable = self.table
+            self.table = self.current_func.table
+            if node.args_list is not None:
+                self.visit(node.args_list)
+            self.visit(node.comp_instr)
+            self.table = globalTable
+            self.current_func = None
+
+    def visit_Assignment(self, node):
         pass

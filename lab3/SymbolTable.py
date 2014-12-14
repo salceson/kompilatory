@@ -9,17 +9,19 @@ class Symbol(object):
 
 
 class VariableSymbol(Symbol):
-    def __init__(self, name, type):
+    def __init__(self, name, type, lineno):
         self.name = name
         self.type = type
+        self.lineno = lineno
 
 
-class FuncCallSymbol(Symbol):
-    def __init__(self, name, type, table):
+class FunctionSymbol(Symbol):
+    def __init__(self, name, type, table, lineno):
         self.name = name
         self.type = type
         self.args = []
         self.table = table
+        self.lineno = lineno
 
     def extract_args(self):
         self.args = [x for x in self.table.symbols.values()]

@@ -24,9 +24,9 @@ class ArgList(Node):
 
 
 class Fundef(Node):
-    def __init__(self, t, _id, args_list, comp_instr):
+    def __init__(self, t, id, args_list, comp_instr):
         self.t = t
-        self._id = _id
+        self.id = id
         self.args_list = args_list
         self.comp_instr = comp_instr
 
@@ -68,15 +68,15 @@ class Expression(Node):
 
 
 class Funcall(Expression):
-    def __init__(self, _id, expr_list, lineno):
-        self._id = _id
+    def __init__(self, id, expr_list, lineno):
+        self.id = id
         self.expr_list = expr_list
         self.lineno = lineno
 
 
 class Variable(Expression):
-    def __init__(self, _id, lineno):
-        self._id = _id
+    def __init__(self, id, lineno):
+        self.id = id
         self.lineno = lineno
 
 

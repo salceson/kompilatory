@@ -41,33 +41,32 @@ class NodeVisitor(object):
             for elem in node:
                 self.visit(elem)
         else:
-            c = None
             #Some hacking due to wrong attributes' names
             try:
-                c = node.children
+                children = node.children
             except AttributeError:
                 try:
-                    c = node.declarations
+                    children = node.declarations
                 except AttributeError:
                     try:
-                        c = node.instructions
+                        children = node.instructions
                     except AttributeError:
                         try:
-                            c = node.arg_list
+                            children = node.arg_list
                         except AttributeError:
                             try:
-                                c = node.fundef_list
+                                children = node.fundef_list
                             except AttributeError:
                                 try:
-                                    c = node.inits
+                                    children = node.inits
                                 except AttributeError:
-                                    c = None
-            if c is None:
+                                    children = None
+            if children is None:
                 return
-            if type(c) is not list:
-                self.visit(c)
+            if not isinstance(children, list):
+                self.visit(children)
             else:
-                for child in c:
+                for child in children:
                     if isinstance(child, list):
                         for item in child:
                             if isinstance(item, AST.Node):

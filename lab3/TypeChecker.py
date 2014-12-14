@@ -141,9 +141,13 @@ class TypeChecker(NodeVisitor):
             self.errors = True
             print "Undefined symbol: {0} at line {1}".format(node.var, node.lineno)
         elif t != definition.type:
-            self.errors = True
-            print "Wrong assignment type for symbol: {0}: symbol's type is {1}," \
-                  " tried to assign type {2} at line {3}.".format(node.var, definition.type,
+            warning = False
+            if definition.type == "float" and t == "int":
+                warning = True
+            self.errors = self.errors or not warning
+            print "{0}Wrong assignment type for symbol: {1}: symbol's type is {2}," \
+                  " tried to assign type {3} at line {4}.".format("Warning: " if warning else "",
+                                                                  node.var, definition.type,
                                                                   t if t is not None else "undefined",
                                                                   node.lineno)
 
@@ -243,7 +247,7 @@ class TypeChecker(NodeVisitor):
                             "Warning: " if warning else "", i, expected.type, actual, node.lineno
                         )
                     i += 1
-                return fundef.type
+            return fundef.type
 
     def visit_ParenExpr(self, node):
         return self.visit(node.expression)

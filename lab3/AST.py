@@ -85,7 +85,6 @@ class Variable(Expression):
 class ParenExpr(Expression):
     def __init__(self, expr_or_err):
         self.expression = expr_or_err
-        self.children = expr_or_err
 
 
 class BinExpr(Expression):
@@ -139,18 +138,21 @@ class LabeledInstruction(Node):
         self.label = label
         self.instr = instr
         self.lineno = lineno
+        self.children = [instr]
 
 
 class PrintInstr(Node):
     def __init__(self, to_print, lineno):
         self.to_print = to_print
         self.lineno = lineno
+        self.children = [to_print]
 
 
 class IfInstr(Node):
     def __init__(self, cond, instr):
         self.cond = cond
         self.instr = instr
+        self.children = [cond, instr]
 
 
 class IfElseInstr(Node):
@@ -158,18 +160,21 @@ class IfElseInstr(Node):
         self.cond = cond
         self.instr = instr
         self.elseinstr = else_instr
+        self.children = [cond, instr, else_instr]
 
 
 class WhileInstr(Node):
     def __init__(self, cond, instr):
         self.cond = cond
         self.instr = instr
+        self.children = [cond, instr]
 
 
 class RepeatInstr(Node):
     def __init__(self, cond, instrs):
         self.cond = cond
         self.instrs = instrs
+        self.children = [cond, instrs]
 
 
 class ReturnInstr(Node):

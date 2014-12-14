@@ -24,7 +24,7 @@ types_table['*']['string']['int'] = 'string'
 for op in ['<', '>', '<=', '>=', '==', '!=']:
     types_table[op]['string']['string'] = 'int'
 
-debug = True
+debug = False
 
 
 class NodeVisitor(object):
@@ -194,3 +194,28 @@ class TypeChecker(NodeVisitor):
         self.visit(node.decls)
         self.visit(node.instrs)
         self.table = prevTable
+
+    def visit_ReturnInstr(self, node):
+        f = self.current_func
+        if f is None:
+            self.errors = True
+            print "Return placed outside function. Line: {0}".format(node.lineno)
+            return
+        t = self.visit(node.expr)
+        if f.type != t:
+            warning = False
+            if f.type == "float" and t == "int":
+                warning = True
+            self.errors = self.errors or not warning
+            print "{0}Tried to return type {1}, function" \
+                  " definition expects type {2}. Line: {3}.".format("Warning: " if Warning else "",
+                                                                    t, f.type, node.lineno)
+
+    def visit_Funcall(self, node):
+        fundef = self.table.getGlobal(node.id)
+        if fundef is None:
+            pass
+        pass
+
+    def visit_ParenExpr(self, node):
+        return self.visit(node.expression)

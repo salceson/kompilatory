@@ -28,7 +28,7 @@ class ArgList(Node):
 
 class Fundef(Node):
     def __init__(self, t, id, args_list, comp_instr, lineno):
-        self.t = vt
+        self.t = t
         self.id = id
         self.args_list = args_list
         self.comp_instr = comp_instr

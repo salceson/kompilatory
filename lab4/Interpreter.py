@@ -1,4 +1,3 @@
-import re
 import string
 import AST
 from Memory import *
@@ -74,7 +73,12 @@ class Interpreter(object):
         if create_memory:
             self.memory_stack.push(Memory("inner"))
         node.decls.accept(self)
-        node.instrs.accept(self)
+        try:
+            node.instrs.accept(self)
+        except Exception as e:
+            if create_memory:
+                self.memory_stack.pop()
+            raise e
         if create_memory:
             self.memory_stack.pop()
 
@@ -88,7 +92,9 @@ class Interpreter(object):
         fun_memory = Memory(node.id)
         if node.expr_list is not None:
             for arg_expression, actual_arg in zip(node.expr_list.expr_list, fun.args_list.arg_list):
-                fun_memory.put(actual_arg.accept(self), arg_expression.accept(self))
+                arg = actual_arg.accept(self)
+                expr = arg_expression.accept(self)
+                fun_memory.put(arg, expr)
         self.memory_stack.push(fun_memory)
         try:
             fun.comp_instr.accept(self, False)

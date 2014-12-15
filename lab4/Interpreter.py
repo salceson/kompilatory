@@ -75,12 +75,9 @@ class Interpreter(object):
         node.decls.accept(self)
         try:
             node.instrs.accept(self)
-        except Exception as e:
+        finally:
             if create_memory:
                 self.memory_stack.pop()
-            raise e
-        if create_memory:
-            self.memory_stack.pop()
 
     @when(AST.Fundef)
     def visit(self, node, create_memory=True):

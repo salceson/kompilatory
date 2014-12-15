@@ -165,7 +165,8 @@ class Interpreter(object):
     @when(AST.PrintInstr)
     def visit(self, node, create_memory=True):
         to_print = str(node.to_print.accept(self))
-        to_print = string.replace(string.replace(to_print, r'"', "", 1), r'"', "", -1)
+        while to_print[0] == '"' and to_print[-1] == '"':
+            to_print = string.replace(string.replace(to_print, r'"', "", 1), r'"', "", -1)
         print to_print
 
     @when(AST.ReturnInstr)

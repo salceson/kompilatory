@@ -79,6 +79,7 @@ class TypeChecker(NodeVisitor):
         self.table = SymbolTable(None, "root")
         self.current_type = ""
         self.current_func = None
+        self.current_loop = None
         self.errors = False
 
     def visit_BinExpr(self, node):
@@ -203,7 +204,7 @@ class TypeChecker(NodeVisitor):
         f = self.current_func
         if f is None:
             self.errors = True
-            print "Return placed outside function. Line: {0}".format(node.lineno)
+            print "Return instruction placed outside of function. Line: {0}".format(node.lineno)
             return
         t = self.visit(node.expr)
         if f.type != t:
@@ -251,3 +252,27 @@ class TypeChecker(NodeVisitor):
 
     def visit_ParenExpr(self, node):
         return self.visit(node.expression)
+
+    def visit_WhileInstr(self, node):
+        self.visit(node.cond)
+        prev_loop = self.current_loop
+        self.current_loop = node
+        self.visit(node.instr)
+        self.current_loop = prev_loop
+
+    def visit_RepeatInstr(self, node):
+        self.visit(node.cond)
+        prev_loop = self.current_loop
+        self.current_loop = node
+        self.visit(node.instrs)
+        self.current_loop = prev_loop
+
+    def visit_BreakInstr(self, node):
+        if self.current_loop is None:
+            self.errors = True
+            print "Break instruction placed outside of loop at line {0}".format(node.lineno)
+
+    def visit_ContinueInstr(self, node):
+        if self.current_loop is None:
+            self.errors = True
+            print "Continue instruction placed outside of loop at line {0}".format(node.lineno)

@@ -213,7 +213,7 @@ class TypeChecker(NodeVisitor):
                 warning = True
             self.errors = self.errors or not warning
             print "{0}Tried to return type {1}, function" \
-                  " definition expects type {2}. Line: {3}.".format("Warning: " if Warning else "",
+                  " definition expects type {2}. Line: {3}.".format("Warning: " if warning else "",
                                                                     t, f.type, node.lineno)
 
     def visit_Funcall(self, node):

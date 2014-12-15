@@ -1,4 +1,9 @@
 int a = 0;
+
+int test() {
+    return "Failed";
+}
+
 print "Test";
 return "Troll";
 continue;

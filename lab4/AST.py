@@ -171,14 +171,12 @@ class WhileInstr(Node):
     def __init__(self, cond, instr):
         self.cond = cond
         self.instr = instr
-        self.children = [cond, instr]
 
 
 class RepeatInstr(Node):
     def __init__(self, cond, instrs):
         self.cond = cond
         self.instrs = instrs
-        self.children = [cond, instrs]
 
 
 class ReturnInstr(Node):
@@ -188,13 +186,13 @@ class ReturnInstr(Node):
 
 
 class ContinueInstr(Node):
-    def __init__(self):
-        pass
+    def __init__(self, lineno):
+        self.lineno = lineno
 
 
 class BreakInstr(Node):
-    def __init__(self):
-        pass
+    def __init__(self, lineno):
+        self.lineno = lineno
 
 
 class CompoundInstr(Node):

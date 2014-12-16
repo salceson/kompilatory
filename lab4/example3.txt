@@ -1,17 +1,18 @@
-int a = 0;
+int i = 0;
 
-int test() {
-    return "Failed";
+int fi(int x) {
+    if (x == 0) return 0;
+    else if (x == 1) return 1;
+    else if (x == 2) return 1;
+    else return fi(x-2) + fi(x-1);
 }
 
-print "Test";
-return "Troll";
-continue;
-break;
-while (a < 10) {
-    print a;
-    a = a + 1;
-    if (a%2 == 0){
-        continue;
-    }
+while (i < 20) {
+    print fi(i);
+    i = i + 1;
 }
+
+
+i = fi;
+
+print i;

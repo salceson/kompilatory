@@ -8,6 +8,7 @@ class parserSpec extends Specification {
   val parser = new Parser()
 
   def parseString(str: String): Node = {
+    if (str == "") EmptyInstr()
 
     val parseResult = parser.parseAll(parser.program, str+"\n")
 
@@ -46,7 +47,7 @@ class parserSpec extends Specification {
       parseString(if_stmt_str) must not(throwA[IllegalArgumentException])
     }
 
-
+/*
     "parse expressions" in {
       parser.parseAll(parser.expression,"True") mustEqual TrueConst()
       parser.parseAll(parser.expression,"False") mustEqual FalseConst()
@@ -58,7 +59,7 @@ class parserSpec extends Specification {
       parser.parseAll(parser.expression, "f(x)") mustEqual FunCall(Variable("f"),NodeList(List(Variable("x"))))
       parser.parseAll(parser.expression, "x.y") mustEqual GetAttr(Variable("x"),"y")
     }
-
+*/
   }
 
   "simplifier" should {

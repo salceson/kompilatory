@@ -1,15 +1,15 @@
 package AST
 
 object Priority {
-    val binary = Map("lambda"->1,
-                     "or"->2,
-                     "and"->3,
-                     "is"->8, "<"->8, ">"->8, ">="->8, "<="->8, "=="->8, "!="->8,
-                     "+"->9,  "-"->9,
-                     "*"->10, "/"->10, "%"->10)
+    val binary = Map("lambda" -> 1,
+                     "or" -> 2,
+                     "and" -> 3,
+                     "is" -> 8, "<" -> 8, ">" -> 8, ">=" -> 8, "<=" -> 8, "==" -> 8, "!=" -> 8,
+                     "+" -> 9,  "-" -> 9,
+                     "*" -> 10, "/" -> 10, "%" -> 10,
+                     "**" -> 12)
 
-    val unary = Map("not"->4,
-                    "+"->12,  "-"->12)
+    val unary = Map("not" -> 4, "+" -> 12,  "-" -> 12)
 }
 
 // sealed trait Node would be also OK
@@ -209,5 +209,6 @@ case class Tuple(list: List[Node]) extends Node {
                          else list.map(_.toStr).mkString("(", ",", ")")
 }
 
-
-        
+case class EmptyInstr() extends Node {
+    override def toStr = ""
+}

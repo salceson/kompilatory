@@ -8,7 +8,8 @@ class Parser extends JavaTokenParsers {
   val precedenceList: List[List[String]] = List( 
       List("is", ">=", "<=", "==", "!=", "<", ">"), // order matters also within inner list, longer op should go before shorter one, e.g. "<=" before "<", if one is a prefix of another
       List("+", "-"),
-      List("*", "/", "%")
+      List("*", "/", "%"),
+      List("**")
   )
 
   val minPrec = 0
@@ -128,7 +129,11 @@ class Parser extends JavaTokenParsers {
       | "("~>expression<~")"
       | "["~>expr_list_comma<~"]" ^^ { 
           case NodeList(x) => ElemList(x)
-          case l => println("Warn: expr_list_comma didn't return NodeList"); l
+          case l => println("Warn: expr_list_comma [list] didn't return NodeList"); l
+        }
+      | "("~>expr_list_comma<~")" ^^ {
+          case NodeList(x) => Tuple(x)
+          case l => println("Warn: expr_list_comma [tuple] didn't return NodeList"); l
         }
       | "{"~>key_datum_list<~"}"
   )

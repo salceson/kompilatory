@@ -70,7 +70,7 @@ object Simplifier {
         case "*" => IntNum(x * y)
         case "/" => IntNum(x / y)
         case "%" => IntNum(x % y)
-        case "**" => IntNum(pow(x.toDouble, y.toDouble).asInstanceOf[Integer]) // dlaczego Integer? dobre pytanie!
+        case "**" => IntNum(pow(x.toDouble, y.toDouble).toInt)
 
         case "==" => if (x == y) TrueConst() else FalseConst()
         case "!=" => if (x != y) TrueConst() else FalseConst()
@@ -214,6 +214,11 @@ object Simplifier {
         val s = simplify(expr)
         if (s != expr) simplify(BinExpr("*", s, FloatNum(n))) else BinExpr("*", s, FloatNum(n))
       }
+
+      // power laws:
+      case (BinExpr("**", leftL, rightL), BinExpr("**", leftR, rightR)) if leftL == leftR =>
+        simplify(BinExpr("**", leftL, BinExpr("+", rightL, rightR))) // TODO: czy potrzebny wewnetrzny simplify?
+
       case (expr, BinExpr("/", exprNum, exprDenom)) => simplify(BinExpr("/", BinExpr("*", expr, exprNum), exprDenom))
       case (BinExpr("/", exprNum, exprDenom), expr) => simplify(BinExpr("/", BinExpr("*", expr, exprNum), exprDenom))
       case (exprL, exprR)      =>
@@ -234,12 +239,41 @@ object Simplifier {
             simplify(BinExpr("/", BinExpr("*", sNumNum, sDenomDenom), BinExpr("*", sNumDenom, sDenomNum)))
           case expr => simplify(BinExpr("/", BinExpr("*", expr, sDenomDenom), sDenomNum))
         }
+
+      // power laws:
+      case (BinExpr("**", leftL, rightL), BinExpr("**", leftR, rightR)) if leftL == leftR =>
+        simplify(BinExpr("**", leftL, BinExpr("-", rightL, rightR))) // TODO: czy potrzebny wewnetrzny simplify?
+
       case (expr, IntNum(n))   if n == 1 => simplify(expr)
       case (expr, FloatNum(n)) if n == 1 => simplify(expr)
       case (exprL, exprR) =>
         val sL = simplify(exprL)
         val sR = simplify(exprR)
         if (sL != exprL || sR != exprR) simplify(BinExpr("/", sL, sR)) else BinExpr("/", sL, sR)
+    }
+
+    case BinExpr("**", left, right)    => (left, right) match {
+      case (expr, IntNum(n))   => if (n == 1) simplify(expr) else if (n == 0) IntNum(1) else {
+        val s = simplify(expr)
+        if (s != expr) simplify(BinExpr("**", s, IntNum(n))) else BinExpr("**", s, IntNum(n))
+      }
+      case (IntNum(n), expr)   => if (n == 1) simplify(expr) else if (n == 0) IntNum(1)   else {
+        val s = simplify(expr)
+        if (s != expr) simplify(BinExpr("**", s, IntNum(n))) else BinExpr("**", s, IntNum(n))
+      }
+      case (expr, FloatNum(n)) => if (n == 1) simplify(expr) else if (n == 0) FloatNum(1) else {
+        val s = simplify(expr)
+        if (s != expr) simplify(BinExpr("**", s, FloatNum(n))) else BinExpr("**", s, FloatNum(n))
+      }
+      case (FloatNum(n), expr) => if (n == 1) simplify(expr) else if (n == 0) FloatNum(1) else {
+        val s = simplify(expr)
+        if (s != expr) simplify(BinExpr("**", s, FloatNum(n))) else BinExpr("**", s, FloatNum(n))
+      }
+
+      case (exprL, exprR)      =>
+        val sL = simplify(exprL)
+        val sR = simplify(exprR)
+        if (sL != exprL || sR != exprR) simplify(BinExpr("*", sL, sR)) else BinExpr("*", sL, sR)
     }
 
     case BinExpr("and", left, right) =>

@@ -16,6 +16,11 @@ object Simplifier {
     case BinExpr("+", Tuple(l1), Tuple(l2)) => Tuple(l1 ++ l2)
     case BinExpr("+", ElemList(l1), ElemList(l2)) => ElemList(l1 ++ l2)
 
+    // usuwanie duplikatow ze slownikow:
+    case KeyDatumList(list) => KeyDatumList(list.foldLeft(Map.empty[Node, KeyDatum])(
+      (_map, kd) => _map + (kd.key -> kd)
+    ).toList.map(p => p._2))
+
     // usuwanie petli z falszywym warunkiem:
     case WhileInstr(cond, body) =>
       val sCond = simplify(cond)
@@ -23,6 +28,35 @@ object Simplifier {
         case FalseConst() => EmptyInstr()
         case _            => WhileInstr(sCond, simplify(body))
       }
+
+    case IfElseInstr(cond, left, right) =>
+      val sCond = simplify(cond)
+      sCond match {
+        case TrueConst()  => simplify(left)
+        case FalseConst() => simplify(right)
+        case _            => IfElseInstr(sCond, simplify(left), simplify(right))
+      }
+
+    case IfInstr(cond, left) =>
+      val sCond = simplify(cond)
+      sCond match {
+        case TrueConst()  => simplify(left)
+        case FalseConst() => EmptyInstr()
+        case _            => IfInstr(sCond, simplify(left))
+      }
+
+    case IfElseExpr(cond, left, right) =>
+      val sCond = simplify(cond)
+      sCond match {
+        case TrueConst()  => simplify(left)
+        case FalseConst() => simplify(right)
+        case _            => IfElseExpr(sCond, simplify(left), simplify(right))
+      }
+
+    case Assignment(Variable(x), expr) => expr match {
+      case Variable(y) if x == y => EmptyInstr()
+      case _                     => Assignment(Variable(x), simplify(expr))
+    }
 
     // <ewaluacja wyrazen> -------------------------------------------------------------------------------
     // ewaluacja jest taka dluga, jesli chcemy pozwolic na domyslne casty intow na floaty w wyrazeniach
@@ -239,7 +273,13 @@ object Simplifier {
     // jesli mamy liste node'ow, to upraszczamy kazdy element z osobna:
     case NodeList(list) => list match {
       case Nil => EmptyInstr()
-      case List(EmptyInstr()) => EmptyInstr()
+      case (nl::Nil) => nl match {
+        case EmptyInstr() => EmptyInstr()
+        case NodeList(l)  => simplify(NodeList(l map simplify)) // zostawiamy tylko jeden layer node listow
+        case n            =>
+          val sN = simplify(n)
+          if (sN != n) simplify(NodeList(List(simplify(n)))) else NodeList(List(sN))
+      }
       case _   =>
         val sList = list map simplify
         val change = (list zip sList) exists (p => p._1 != p._2)

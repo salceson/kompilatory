@@ -281,8 +281,18 @@ object Simplifier {
           if (sN != n) simplify(NodeList(List(simplify(n)))) else NodeList(List(sN))
       }
       case _   =>
-        val sList = list map simplify
-        val change = (list zip sList) exists (p => p._1 != p._2)
+        val sList = (list map simplify).foldRight(List.empty[Node])(
+          (n: Node, list2: List[Node]) => list2 match {
+            case Nil   => List(n)
+            case x::xs => (n, x) match {
+              case (Assignment(lvalN, rvalN), Assignment(lvalX, rvalX)) =>
+                if (lvalN == lvalX) x::xs else n::x::xs
+              case _ => x::xs
+            }
+          }
+        ).reverse
+
+        val change = (list.length != sList.length) && ((list zip sList) exists (p => p._1 != p._2))
         if (change) simplify(NodeList(sList)) else NodeList(sList)
     }
     // w pozostalych przypadkach nie da sie juz nic uproscic:

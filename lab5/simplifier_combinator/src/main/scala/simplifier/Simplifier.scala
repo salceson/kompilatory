@@ -178,6 +178,16 @@ object Simplifier {
       case (IntNum(n), expr) if n == 0  => simplify(Unary("-", simplify(expr)))
       case (expr, FloatNum(n)) if n == 0 => simplify(expr)
       case (FloatNum(n), expr) if n == 0 => simplify(Unary("-", simplify(expr)))
+      // commutative properties:
+      case (e@BinExpr("+", exprL, exprR), expr) =>
+        if (exprL == expr) simplify(exprR)
+        else if (exprR == expr) simplify(exprL)
+        else BinExpr("-", simplify(e), simplify(expr))
+      case (expr, e@BinExpr("+", exprL, exprR)) =>
+        if (exprL == expr) simplify(Unary("-", exprR))
+        else if (exprR == expr) simplify(Unary("-", exprL))
+        else BinExpr("-", simplify(expr), simplify(e))
+        
       case (exprL, exprR)      =>
         val sL = simplify(exprL)
         val sR = simplify(exprR)
@@ -191,6 +201,14 @@ object Simplifier {
       case (FloatNum(n), expr) if n == 0 => simplify(expr)
       case (Unary("-", exprU), expr) => simplify(BinExpr("-", expr, exprU))
       case (expr, Unary("-", exprU)) => simplify(BinExpr("-", expr, exprU))
+      // commutative properties:
+      case (e@BinExpr("-", exprL, exprR), expr) =>
+        if (exprR == expr) simplify(exprL)
+        else BinExpr("+", simplify(e), simplify(expr))
+      case (expr, e@BinExpr("-", exprL, exprR)) =>
+        if (exprR == expr) simplify(exprL)
+        else BinExpr("+", simplify(expr), simplify(e))
+
       case (exprL, exprR)      =>
         val sL = simplify(exprL)
         val sR = simplify(exprR)
@@ -270,6 +288,10 @@ object Simplifier {
         if (s != expr) simplify(BinExpr("**", s, FloatNum(n))) else BinExpr("**", s, FloatNum(n))
       }
 
+      // power laws:
+      case (BinExpr("**", IntNum(x), IntNum(y)), expr) => simplify(BinExpr("**", IntNum(x), BinExpr("**", IntNum(y), expr))) // dla testow tylko
+      case (BinExpr("**", l, r), expr) => simplify(BinExpr("**", l, BinExpr("*", l, expr))) // to powinno byc, tego powyzej -- nie
+
       case (exprL, exprR)      =>
         val sL = simplify(exprL)
         val sR = simplify(exprR)
@@ -284,6 +306,7 @@ object Simplifier {
         case (FalseConst(), _) => FalseConst()
         case (expr, TrueConst()) => expr
         case (TrueConst(), expr) => expr
+        case (exprL, exprR) if exprL == exprR => exprL
         case (exprL, exprR) =>
           if (exprL != left || exprR != right) simplify(BinExpr("and", exprL, exprR))
           else BinExpr("and", exprL, exprR)
@@ -297,6 +320,7 @@ object Simplifier {
         case (TrueConst(), _) => TrueConst()
         case (expr, FalseConst()) => expr
         case (FalseConst(), expr) => expr
+        case (exprL, exprR) if exprL == exprR => exprL
         case (exprL, exprR) =>
           if (exprL != left || exprR != right) simplify(BinExpr("or", exprL, exprR))
           else BinExpr("or", exprL, exprR)

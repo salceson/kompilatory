@@ -237,7 +237,14 @@ object Simplifier {
     // </upraszczanie wyrazen binarnych typu x + 0> --------------------------------------------------------------
 
     // jesli mamy liste node'ow, to upraszczamy kazdy element z osobna:
-    case NodeList(list) => NodeList(list map simplify)
+    case NodeList(list) => list match {
+      case Nil => EmptyInstr()
+      case List(EmptyInstr()) => EmptyInstr()
+      case _   =>
+        val sList = list map simplify
+        val change = (list zip sList) exists (p => p._1 != p._2)
+        if (change) simplify(NodeList(sList)) else NodeList(sList)
+    }
     // w pozostalych przypadkach nie da sie juz nic uproscic:
     case n => n
   }

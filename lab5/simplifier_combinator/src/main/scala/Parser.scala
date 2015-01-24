@@ -16,11 +16,6 @@ class Parser extends JavaTokenParsers {
   
   protected override val whiteSpace = """(\t|\r|[ ]|#.*|(?s)/\*.*?\*/)+""".r
   
-  val id: Parser[String] = not(reserved) ~> """[a-zA-Z_]\w*""".r
-  
-  val lpar = rep1(newl) ~ "{" ~ rep(newl)
-  val rpar = rep(newl) ~ "}" ~ rep1(newl)
-  
   val newl: Parser[Node] = """(\r?\n)|\r""".r ^^ StringConst
 
   val reserved: Parser[String] = "and\\b".r |
@@ -38,6 +33,11 @@ class Parser extends JavaTokenParsers {
                                  "return\\b".r |
                                  "True\\b".r |
                                  "while\\b".r
+
+  val id: Parser[String] = not(reserved) ~> """[a-zA-Z_]\w*""".r
+
+  val lpar = rep1(newl) ~ "{" ~ rep(newl)
+  val rpar = rep(newl) ~ "}" ~ rep1(newl)
 
   val floatLiteral: Parser[Double] = """\d+(\.\d*)|\.\d+""".r ^^ { _.toDouble }
   
@@ -116,12 +116,10 @@ class Parser extends JavaTokenParsers {
   }
   
 
-  def unary: Parser[Node] = (
-        ("+"|"-")~unary ^^ { case "+" ~ expression => expression
-                             case "-" ~ expression => Unary("-", expression) 
-                           }
-      | primary
-  )
+  def unary: Parser[Node] = ("+" | "-") ~ unary ^^ {
+    case "+" ~ expression => expression
+    case "-" ~ expression => Unary("-", expression)
+  } | primary
 
 
   def primary: Parser[Node] = (
@@ -141,10 +139,10 @@ class Parser extends JavaTokenParsers {
   }
 
   def trailer: Parser[List[Tuple2[String,Node]]] = rep( 
-                                                     "(" ~> expr_list <~")" ^^ { case expr_list => Tuple2("(", expr_list) }
-                                                   | "[" ~> expression <~"]" ^^ { case expression => Tuple2("[", expression) }
-                                                   | "." ~> id ^^ { case id => Tuple2(".", Variable(id)) }
-                                                 )
+           "(" ~> expr_list <~")" ^^ { case expr_list => Tuple2("(", expr_list) }
+         | "[" ~> expression <~"]" ^^ { case expression => Tuple2("[", expression) }
+         | "." ~> id ^^ { case id => Tuple2(".", Variable(id)) }
+       )
 
   def foldTrailer(head: Node, list: List[Tuple2[String,Node]]): Node = {
       list match {
@@ -221,12 +219,21 @@ class Parser extends JavaTokenParsers {
       case target ~ expression => Assignment(target, expression)
   }
 
-  def if_else_stmt: Parser[Node] = (
-        "if" ~> expression ~ (":" ~> suite) ~ ("else"~":" ~> suite).? ^^ {
-            case expression ~ suite1 ~ Some(suite2) => IfElseInstr(expression, suite1, suite2)
-            case expression ~ suite ~ None => IfInstr(expression, suite)
+  def if_else_stmt: Parser[Node] =
+    "if" ~> expression ~ (":" ~> suite) ~ ("elif" ~> expression ~ (":" ~> suite)).* ~ ("else"~":" ~> suite).? ^^ {
+      case expression ~ suite1 ~ elifs ~ Some(suite2) =>
+        val alternative = elifs.foldRight(suite2) {
+          case (_expression ~ _suite1, _suite2) => IfElseInstr(_expression, _suite1, _suite2)
         }
-  )
+        IfElseInstr(expression, suite1, alternative)
+      case expression ~ suite ~ elifs ~ None if elifs.size == 0 =>
+        IfInstr(expression, suite)
+      case expression ~ suite ~ elifs ~ None =>
+        val alternative = elifs.init.foldRight[Node](IfInstr(elifs.last._1, elifs.last._2)) {
+          case (_expression ~ _suite1, _suite2) => IfElseInstr(_expression, _suite1, _suite2)
+        }
+        IfElseInstr(expression, suite, alternative)
+    }
 
   def while_stmt: Parser[WhileInstr] = "while" ~> expression ~ (":"~>suite) ^^ {
       case expression ~ suite => WhileInstr(expression, suite)

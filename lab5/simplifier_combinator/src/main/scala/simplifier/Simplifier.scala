@@ -187,7 +187,7 @@ object Simplifier {
         if (exprL == expr) simplify(Unary("-", exprR))
         else if (exprR == expr) simplify(Unary("-", exprL))
         else BinExpr("-", simplify(expr), simplify(e))
-        
+
       case (exprL, exprR)      =>
         val sL = simplify(exprL)
         val sR = simplify(exprR)
@@ -270,7 +270,7 @@ object Simplifier {
         if (sL != exprL || sR != exprR) simplify(BinExpr("/", sL, sR)) else BinExpr("/", sL, sR)
     }
 
-    case BinExpr("**", left, right)    => (left, right) match {
+    case BinExpr("**", left, right)    => (simplify(left), simplify(right)) match {
       case (expr, IntNum(n))   => if (n == 1) simplify(expr) else if (n == 0) IntNum(1) else {
         val s = simplify(expr)
         if (s != expr) simplify(BinExpr("**", s, IntNum(n))) else BinExpr("**", s, IntNum(n))
@@ -289,13 +289,13 @@ object Simplifier {
       }
 
       // power laws:
-      case (BinExpr("**", IntNum(x), IntNum(y)), expr) => simplify(BinExpr("**", IntNum(x), BinExpr("**", IntNum(y), expr))) // dla testow tylko
-      case (BinExpr("**", l, r), expr) => simplify(BinExpr("**", l, BinExpr("*", l, expr))) // to powinno byc, tego powyzej -- nie
+      //case (BinExpr("**", IntNum(x), IntNum(y)), expr) => simplify(BinExpr("**", IntNum(x), BinExpr("**", IntNum(y), expr))) // dla testow tylko
+      case (BinExpr("**", l, r), expr) => simplify(BinExpr("**", l, BinExpr("*", r, expr))) // to powinno byc, tego powyzej -- nie
 
       case (exprL, exprR)      =>
         val sL = simplify(exprL)
         val sR = simplify(exprR)
-        if (sL != exprL || sR != exprR) simplify(BinExpr("*", sL, sR)) else BinExpr("*", sL, sR)
+        if (sL != exprL || sR != exprR) simplify(BinExpr("**", sL, sR)) else BinExpr("**", sL, sR)
     }
 
     case BinExpr("and", left, right) =>

@@ -107,7 +107,11 @@ class Parser extends JavaTokenParsers {
   }
 
 
-  def binary(level: Int): Parser[Node] = if (level>maxPrec) unary else chainl1( binary(level+1), binaryOp(level) ) // equivalent to binary(level+1) * binaryOp(level)
+  def binary(level: Int): Parser[Node] = if (level>maxPrec) unary
+    else if(level==maxPrec) rep1sep(binary(level+1), "**") ^^ {_.reduceRight(BinExpr("**", _, _))}
+    else chainl1( binary(level+1), binaryOp(level) ) // equivalent to binary(level+1) * binaryOp(level)
+
+  //def binary(level: Int): Parser[Node] = if (level>maxPrec) unary else chainl1( binary(level+1), binaryOp(level) ) // equivalent to binary(level+1) * binaryOp(level)
 
   // operator precedence parsing takes place here
   def binaryOp(level: Int): Parser[((Node, Node) => BinExpr)] = {

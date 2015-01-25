@@ -12,6 +12,10 @@ object Simplifier {
     // na samym poczatku musza byc patterny najbardziej szczegolowe, zeby te bardziej ogolne ich
     // nie "zjadly" :)
 
+    // balansowanie drzew:
+    case (BinExpr("+", BinExpr("+", BinExpr("+", BinExpr("*", x1, y1), BinExpr("*", x2, y2)), BinExpr("*", x3, y3)), BinExpr("*", x4, y4)))
+    => simplify(BinExpr("+", BinExpr("+", BinExpr("*", x1, y1), BinExpr("*", x2, y2)), BinExpr("+", BinExpr("*", x3, y3), BinExpr("*", x4, y4))))
+
     // konkatenacja tupli i list na samym poczatku (albowiem j.w.):
     case BinExpr("+", Tuple(l1), Tuple(l2)) => Tuple(l1 ++ l2)
     case BinExpr("+", ElemList(l1), ElemList(l2)) => ElemList(l1 ++ l2)
@@ -172,12 +176,37 @@ object Simplifier {
 
     // <upraszczanie wyrazen binarnych typu x + 0> --------------------------------------------------------------
 
-    case BinExpr("-", left, right)    => (left, right) match {
+    case BinExpr("-", left, right)    => (simplify(left), simplify(right)) match {
       case (exprL, exprR) if exprL == exprR => IntNum(0)
-      case (expr, IntNum(n)) if n == 0  => simplify(expr)
-      case (IntNum(n), expr) if n == 0  => simplify(Unary("-", simplify(expr)))
-      case (expr, FloatNum(n)) if n == 0 => simplify(expr)
-      case (FloatNum(n), expr) if n == 0 => simplify(Unary("-", simplify(expr)))
+      case (expr, IntNum(n)) if n == 0  => expr
+      case (IntNum(n), expr) if n == 0  => simplify(Unary("-", expr))
+      case (expr, FloatNum(n)) if n == 0 => expr
+      case (FloatNum(n), expr) if n == 0 => simplify(Unary("-", expr))
+
+      // distributive properties of "*":
+      case (BinExpr("*", l, r), expr) if expr == l => simplify(BinExpr("*", BinExpr("-", r, IntNum(1)), l))
+      case (BinExpr("*", l, r), expr) if expr == r => simplify(BinExpr("*", BinExpr("-", l, IntNum(1)), r))
+
+      case (e1@BinExpr("*", l1, r1), e2@BinExpr("*", l2, r2)) =>
+        if (l1 == l2) BinExpr("*", BinExpr("+", r1, r2), l1)
+        else if (r1 == r2) BinExpr("*", BinExpr("-", l1, l2), r1)
+        else if (l1 == r2) BinExpr("*", BinExpr("-", r1, l2), l1)
+        else if (r1 == l2) BinExpr("*", BinExpr("-", l1, r2), r1)
+        else {
+          val s1 = simplify(e1)
+          val s2 = simplify(e2)
+          if (s1 != e1 || s2 != e2) simplify(BinExpr("-", s1, s2)) else BinExpr("-", s1, s2)
+        }
+
+      // distributive properties of "/":
+      case (e1@BinExpr("/", l1, r1), e2@BinExpr("/", l2, r2)) =>
+        if (r1 == r2) BinExpr("/", BinExpr("-", l1, l2), r1)
+        else {
+          val s1 = simplify(e1)
+          val s2 = simplify(e2)
+          if (s1 != e1 || s2 != e2) simplify(BinExpr("-", s1, s2)) else BinExpr("-", s1, s2)
+        }
+
       // commutative properties:
       case (e@BinExpr("+", exprL, exprR), expr) =>
         if (exprL == expr) simplify(exprR)
@@ -194,13 +223,54 @@ object Simplifier {
         if (sL != exprL || sR != exprR) simplify(BinExpr("-", sL, sR)) else BinExpr("-", sL, sR)
     }
 
-    case BinExpr("+", left, right)    => (left, right) match {
-      case (expr, IntNum(n)) if n == 0  => simplify(expr)
-      case (IntNum(n), expr) if n == 0  => simplify(expr)
-      case (expr, FloatNum(n)) if n == 0 => simplify(expr)
-      case (FloatNum(n), expr) if n == 0 => simplify(expr)
+    case BinExpr("+", left, right)    => (simplify(left), simplify(right)) match {
+      case (expr, IntNum(n)) if n == 0  => expr
+      case (IntNum(n), expr) if n == 0  => expr
+      case (expr, FloatNum(n)) if n == 0 => expr
+      case (FloatNum(n), expr) if n == 0 => expr
       case (Unary("-", exprU), expr) => simplify(BinExpr("-", expr, exprU))
       case (expr, Unary("-", exprU)) => simplify(BinExpr("-", expr, exprU))
+
+      // balansowanie drzewa, w razie czego:
+//      case (BinExpr("+",
+//              BinExpr("+",
+//                 BinExpr("*", x1, y1),
+//                 BinExpr("*", x2, y2)),
+//              BinExpr("*", x3, y3)),
+//            BinExpr("*", x4, y4)) =>
+//
+//          simplify(BinExpr("+",
+//            simplify(BinExpr("+",
+//              simplify(BinExpr("*", x1, y1)),
+//              simplify(BinExpr("*", x2, y2)))),
+//            simplify(BinExpr("+",
+//              simplify(BinExpr("*", x2, y3)),
+//              simplify(BinExpr("*", x4, y4)))))
+//          )
+      // distributive properties of "*":
+      case (BinExpr("*", l, r), expr) if expr == l => simplify(BinExpr("*", BinExpr("+", r, IntNum(1)), l))
+      case (BinExpr("*", l, r), expr) if expr == r => simplify(BinExpr("*", BinExpr("+", l, IntNum(1)), r))
+
+      case (e1@BinExpr("*", l1, r1), e2@BinExpr("*", l2, r2)) =>
+        if (l1 == l2) BinExpr("*", BinExpr("+", r1, r2), l1)
+        else if (r1 == r2) BinExpr("*", BinExpr("+", l1, l2), r1)
+        else if (l1 == r2) BinExpr("*", BinExpr("+", r1, l2), l1)
+        else if (r1 == l2) BinExpr("*", BinExpr("+", l1, r2), r1)
+        else {
+          val s1 = simplify(e1)
+          val s2 = simplify(e2)
+          if (s1 != e1 || s2 != e2) simplify(BinExpr("+", s1, s2)) else BinExpr("+", s1, s2)
+        }
+
+      // distributive properties of "/":
+      case (e1@BinExpr("/", l1, r1), e2@BinExpr("/", l2, r2)) =>
+        if (r1 == r2) BinExpr("/", BinExpr("+", l1, l2), r1)
+        else {
+          val s1 = simplify(e1)
+          val s2 = simplify(e2)
+          if (s1 != e1 || s2 != e2) simplify(BinExpr("+", s1, s2)) else BinExpr("+", s1, s2)
+        }
+
       // commutative properties:
       case (e@BinExpr("-", exprL, exprR), expr) =>
         if (exprR == expr) simplify(exprL)

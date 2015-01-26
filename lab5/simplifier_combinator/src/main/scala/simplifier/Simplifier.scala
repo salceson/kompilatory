@@ -12,10 +12,6 @@ object Simplifier {
     // na samym poczatku musza byc patterny najbardziej szczegolowe, zeby te bardziej ogolne ich
     // nie "zjadly" :)
 
-    // balansowanie drzew:
-    case (BinExpr("+", BinExpr("+", BinExpr("+", BinExpr("*", x1, y1), BinExpr("*", x2, y2)), BinExpr("*", x3, y3)), BinExpr("*", x4, y4)))
-    => simplify(BinExpr("+", BinExpr("+", BinExpr("*", x1, y1), BinExpr("*", x2, y2)), BinExpr("+", BinExpr("*", x3, y3), BinExpr("*", x4, y4))))
-
     // konkatenacja tupli i list na samym poczatku (albowiem j.w.):
     case BinExpr("+", Tuple(l1), Tuple(l2)) => Tuple(l1 ++ l2)
     case BinExpr("+", ElemList(l1), ElemList(l2)) => ElemList(l1 ++ l2)
@@ -175,6 +171,10 @@ object Simplifier {
     // </upraszczanie wyrazen unarnych> --------------------------------------------------------------
 
     // <upraszczanie wyrazen binarnych typu x + 0> --------------------------------------------------------------
+    // balansowanie drzew:
+    case (BinExpr("+", BinExpr("+", BinExpr("+", BinExpr("*", x1, y1), BinExpr("*", x2, y2)), BinExpr("*", x3, y3)), BinExpr("*", x4, y4)))
+      => simplify(BinExpr("+", BinExpr("+", BinExpr("*", x1, y1), BinExpr("*", x2, y2)), BinExpr("+", BinExpr("*", x3, y3), BinExpr("*", x4, y4))))
+
 
     case BinExpr("-", left, right)    => (simplify(left), simplify(right)) match {
       case (exprL, exprR) if exprL == exprR => IntNum(0)
@@ -206,6 +206,20 @@ object Simplifier {
           val s2 = simplify(e2)
           if (s1 != e1 || s2 != e2) simplify(BinExpr("-", s1, s2)) else BinExpr("-", s1, s2)
         }
+
+      // wzory skr. mnozenia:
+      case (e1@BinExpr("**", BinExpr(op1, x1, y1), IntNum(a)), e2@BinExpr("**", BinExpr(op2, x2, y2), IntNum(b)))
+        if x1 == x2 && y1 == y2 && a == 2 && b == 2 =>
+          if (op1 == "+" && op2 == "-") BinExpr("*", BinExpr("*", x1, IntNum(4)), y1)
+          else if (op1 == "-" && op2 == "+") Unary("-", BinExpr("*", BinExpr("*", x1, IntNum(4)), y1))
+          else BinExpr("-", simplify(e1), simplify(e2))
+
+      case (BinExpr("-", BinExpr("**", BinExpr("+", x1, y1), IntNum(a)), BinExpr("**", x2, IntNum(b))), BinExpr("*", BinExpr("*", x3, IntNum(c)), y3))
+        if a == 2 && b == 2 && c == 2 && x1 == x2 && ((x1 == x3 && y1 == y3) || (x1 == y3 && y1 == x3)) =>
+          simplify(BinExpr("**", y1, IntNum(2)))
+      case (BinExpr("-", BinExpr("**", BinExpr("+", x1, y1), IntNum(a)), BinExpr("**", x2, IntNum(b))), BinExpr("*", BinExpr("*", x3, IntNum(c)), y3))
+        if a == 2 && b == 2 && c == 2 && y1 == x2 && ((x1 == x3 && y1 == y3) || (x1 == y3 && y1 == x3)) =>
+        BinExpr("**", x1, IntNum(2))
 
       // commutative properties:
       case (e@BinExpr("+", exprL, exprR), expr) =>
@@ -250,6 +264,17 @@ object Simplifier {
       // distributive properties of "*":
       case (BinExpr("*", l, r), expr) if expr == l => simplify(BinExpr("*", BinExpr("+", r, IntNum(1)), l))
       case (BinExpr("*", l, r), expr) if expr == r => simplify(BinExpr("*", BinExpr("+", l, IntNum(1)), r))
+
+      // wzory sk. mnozenia:
+      case (BinExpr("+", BinExpr("**", x1, IntNum(a)), BinExpr("*", BinExpr("*", x2, IntNum(b)), y2)), BinExpr("**", y3, IntNum(c)))
+        if a == 2 && b == 2 && c == 2 && (x1 == x2 && y2 == y3) =>
+          simplify(BinExpr("**", BinExpr("+", x1, y2), IntNum(2)))
+      case (BinExpr("+", BinExpr("**", x1, IntNum(a)), BinExpr("*", BinExpr("*", x2, IntNum(b)), y2)), BinExpr("**", y3, IntNum(c)))
+        if a == 2 && b == 2 && c == 2 && (x1 == y2 && x2 == y3) =>
+          simplify(BinExpr("**", BinExpr("+", x1, y3), IntNum(2)))
+
+
+
 
       case (e1@BinExpr("*", l1, r1), e2@BinExpr("*", l2, r2)) =>
         if (l1 == l2) BinExpr("*", BinExpr("+", r1, r2), l1)

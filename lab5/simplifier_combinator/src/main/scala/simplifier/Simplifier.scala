@@ -13,8 +13,8 @@ object Simplifier {
     // nie "zjadly" :)
 
     // konkatenacja tupli i list na samym poczatku (albowiem j.w.):
-    case BinExpr("+", Tuple(l1), Tuple(l2)) => Tuple(l1 ++ l2)
-    case BinExpr("+", ElemList(l1), ElemList(l2)) => ElemList(l1 ++ l2)
+    case BinExpr("+", Tuple(l1), Tuple(l2)) => Tuple((l1 ++ l2) map simplify)
+    case BinExpr("+", ElemList(l1), ElemList(l2)) => ElemList((l1 ++ l2) map simplify)
 
     // usuwanie duplikatow ze slownikow:
     case KeyDatumList(list) => KeyDatumList(list.foldLeft(Map.empty[Node, KeyDatum])(
